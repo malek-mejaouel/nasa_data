@@ -5,9 +5,78 @@
   "description": "Central index of all datasets handled by this project.",
   "datasets": [
     {
+      "id": "curiosity_hirise_mosaic",
+      "name": "Mars Curiosity HiRISE Mosaic (Gale Crater)",
+      "source_url": null,
+      "local_path": "ressources/curiosity_hirise_mosaic.tif",
+      "access_mode": "local file (read-only)",
+      "viewer_url": "https://trek.nasa.gov/mars/#v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn%3Aogc%3Adef%3Acrs%3AEPSG%3A%3A104905&d=&l=curiosity_hirise_mosaic%2Ctrue%2C1&l=Gale_CTX_BlockAdj_dd%2Ctrue%2C1&locale=&b=mars&e=137.05509596012425%2C-5.044352922849646%2C137.95460155857964%2C-4.129741123504169&sfz=&w=",
+      "original_filename": "curiosity_hirise_mosaic.tif",
+      "original_format": "GTiff",
+      "planet": "Mars",
+      "iau_identifier": 49900,
+      "crs": {
+        "original": "ESRI:104905",
+        "storage": "Mars (2015) - Sphere / Ocentric",
+        "compute": "Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m)",
+        "storage_proj4": "+proj=longlat +R=3396190 +no_defs +type=crs",
+        "compute_proj4": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs"
+      },
+      "geographic_extent": {
+        "min_lon": 137.12246691438963,
+        "max_lon": 137.729812906933,
+        "min_lat": -4.925474311955909,
+        "max_lat": -4.248958839494268
+      },
+      "resolution": {
+        "value": [
+          0.2500000000000041,
+          0.25000000000000216
+        ],
+        "native_value": [
+          4.217651214528874e-06,
+          4.217651214528841e-06
+        ],
+        "native_units": "degrees/pixel",
+        "units": "metres/pixel (ground, on the Mars 2000 sphere)"
+      },
+      "data_type": "uint8",
+      "bands": 1,
+      "file_size_bytes": 8605826726,
+      "processing_status": "processed",
+      "output_files": [
+        "data\\processed\\curiosity_aoi_boxwork_compute_aeqd_25cm.tif",
+        "data\\processed\\curiosity_aoi_boxwork_geographic_25cm.tif",
+        "outputs\\curiosity_aoi_boxwork_preview.png",
+        "data\\processed\\curiosity_aoi_hidden_valley_compute_aeqd_25cm.tif",
+        "data\\processed\\curiosity_aoi_hidden_valley_geographic_25cm.tif",
+        "outputs\\curiosity_aoi_hidden_valley_preview.png"
+      ],
+      "dataset_json": "metadata\\curiosity_hirise_mosaic.json",
+      "extraction_timestamp": "2026-11-14T16:53:03+01:00",
+      "validation_status": {
+        "mars_crs_verified": true,
+        "source_verified": true
+      },
+      "warnings": [
+        "Pixel values are 8-bit image DN (0-255), not elevation; terrain derivatives are not applicable.",
+        "NoData is not declared by the file; every pixel is treated as valid.",
+        "This local file covers only the Curiosity rover traverse footprint, a subset of the regional orthophoto mosaic."
+      ],
+      "assumptions": [
+        "The file in ressources/ is the locally supplied GeoTIFF whose footprint, pixel size and CRS match the Mars Trek `curiosity_hirise_mosaic` WMTS layer (urn:ogc:def:crs:EPSG::104905).",
+        "The upstream processing chain of this particular file is not documented inside the file itself; its provenance is inferred from the matching footprint, CRS and layer identifier.",
+        "The project study areas (aoi_gale_regional, aoi_boxwork, aoi_hidden_valley) are shared with the remote mosaic dataset; aoi_boxwork and aoi_hidden_valley are DERIVED placeholder windows, not authoritative feature outlines.",
+        "The compute CRS is an Azimuthal Equidistant projection centred on Gale Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m)."
+      ],
+      "attribution": "Mars Curiosity HiRISE Mosaic, USGS Astrogeology Science Center, NASA Mars Trek (trek.nasa.gov)."
+    },
+    {
       "id": "msl_gale_orthophoto_mosaic_25cm_v3",
       "name": "Mars MSL Gale Merged Orthophoto Mosaic 25cm",
       "source_url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+      "local_path": null,
+      "access_mode": null,
       "viewer_url": "https://trek.nasa.gov/mars/#v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn%3Aogc%3Adef%3Acrs%3AEPSG%3A%3A104905&d=&l=curiosity_hirise_mosaic%2Ctrue%2C1&l=Gale_CTX_BlockAdj_dd%2Ctrue%2C1&locale=&b=mars&e=137.05509596012425%2C-5.044352922849646%2C137.95460155857964%2C-4.129741123504169&sfz=&w=",
       "original_filename": "MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
       "original_format": "GTiff",
@@ -31,7 +100,12 @@
           0.25,
           0.25
         ],
-        "units": "metres/pixel"
+        "native_value": [
+          0.25,
+          0.25
+        ],
+        "native_units": "metres/pixel (projected)",
+        "units": "metres/pixel (ground, on the Mars 2000 sphere)"
       },
       "data_type": "uint8",
       "bands": 1,
@@ -46,7 +120,7 @@
         "outputs\\aoi_hidden_valley_preview.png"
       ],
       "dataset_json": "metadata\\msl_gale_orthophoto_mosaic_25cm_v3.json",
-      "extraction_timestamp": "2026-11-14T15:10:30+01:00",
+      "extraction_timestamp": "2026-11-14T16:53:03+01:00",
       "validation_status": {
         "mars_crs_verified": true,
         "source_verified": true

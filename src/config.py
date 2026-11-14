@@ -121,3 +121,37 @@ GDAL_ENV = {
 # source rows are stored back-to-back, so a window of ``n`` rows costs
 # ``n * width`` bytes (a full-width band) rather than ``n * window_width``.
 MAX_TRANSFER_BYTES = 600_000_000      # ~600 MB per AOI (well under the 50 GB source)
+
+# ---------------------------------------------------------------------------
+# Second dataset: local GeoTIFF provided by the user in ressources/
+# ---------------------------------------------------------------------------
+# The file is the `curiosity_hirise_mosaic` Mars Trek layer footprint, stored in
+# the geographic Mars 2000 CRS (ESRI:104905 / GCS_Mars_2000). Its bounds are
+# identical to TREK_LAYER["bbox_lon_lat"]. It is read directly from disk
+# (read-only) which makes whole-raster statistics feasible.
+LOCAL_DATASET_ID = "curiosity_hirise_mosaic"
+LOCAL_DATASET_NAME = "Mars Curiosity HiRISE Mosaic (Gale Crater)"
+LOCAL_DATASET_FILENAME = "curiosity_hirise_mosaic.tif"
+LOCAL_SOURCE_DIR = os.path.join(PROJECT_ROOT, "ressources")
+LOCAL_SOURCE_PATH = os.path.join(LOCAL_SOURCE_DIR, LOCAL_DATASET_FILENAME)
+LOCAL_SOURCE_ADDRESS = "ressources/" + LOCAL_DATASET_FILENAME
+
+LOCAL_SOURCE_METADATA = {
+    "authors": "USGS Astrogeology Science Center",
+    "publisher": "USGS Astrogeology Science Center",
+    "recommended_citation": (
+        "Mars Curiosity HiRISE Mosaic, USGS Astrogeology Science Center, "
+        "NASA Mars Trek (trek.nasa.gov)."
+    ),
+    "provenance_note": (
+        "Locally supplied GeoTIFF; its footprint and CRS match the Mars Trek "
+        "`curiosity_hirise_mosaic` WMTS layer (urn:ogc:def:crs:EPSG::104905). "
+        "The exact upstream processing chain of this particular file is not "
+        "documented inside the file itself."
+    ),
+    "latitude_type": "Planetocentric",
+    "longitude_direction": "Positive East",
+    "longitude_domain": "-180 to 180",
+    "radius_a_m": 3396190,
+    "radius_c_m": 3396190,
+}

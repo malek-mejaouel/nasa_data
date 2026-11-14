@@ -59,6 +59,17 @@ def read_metadata(ds) -> dict:
     else:
         geo_bounds = {}
 
+    # Native pixel size, plus the equivalent ground size in metres so that
+    # geographic (degrees) and projected (metres) sources are comparable.
+    res_x, res_y = abs(tr.a), abs(tr.e)
+    if crs is not None and crs.is_geographic:
+        res_m = [math.radians(res_x) * config.MARS_SPHERE_RADIUS_M,
+                 math.radians(res_y) * config.MARS_SPHERE_RADIUS_M]
+        res_native_units = "degrees/pixel"
+    else:
+        res_m = [res_x, res_y]
+        res_native_units = "metres/pixel (projected)"
+
     meta = {
         "driver": ds.driver,
         "width": ds.width,
@@ -71,6 +82,8 @@ def read_metadata(ds) -> dict:
         "crs_declared_wkt": crs.to_wkt() if crs else None,
         "geotransform": [tr.a, tr.b, tr.c, tr.d, tr.e, tr.f],
         "pixel_resolution": [abs(tr.a), abs(tr.e)],
+        "pixel_resolution_m": res_m,
+        "pixel_resolution_native_units": res_native_units,
         "native_bounds": {
             "left": bounds.left,
             "bottom": bounds.bottom,
@@ -166,6 +179,108 @@ def band_transfer_bytes(ds, window) -> int:
         return int(window.height) * ds.width * itemsize
     return int(window.width) * int(window.height) * itemsize
 
+
+
+def compute_full_statistics(ds, band: int = 1, chunk_rows: int = 8192,
+                            hist_block: int = 1 << 16) -> dict:
+    """Whole-raster statistics computed in row chunks.
+
+    Feasible for a *local* dataset (the remote source has no overviews and is
+    never fully transferred). Nodata pixels are excluded from the moments.
+    For 8-bit integer data an exact 256-bin histogram is accumulated, from
+    which all statistics (including percentiles) are derived exactly. The
+    histogram is built in small blocks because a single ``np.bincount`` over a
+    multi-gigabyte buffer is memory-bandwidth bound.
+    """
+    nodata = ds.nodatavals[band - 1] if ds.nodatavals else None
+    dtype = np.dtype(ds.dtypes[band - 1])
+    is_8bit = np.issubdtype(dtype, np.integer) and dtype.itemsize == 1
+    signed = np.issubdtype(dtype, np.signedinteger)
+    offset = 128 if signed else 0
+    hist = np.zeros(256, dtype="int64") if is_8bit else None
+
+    total = 0
+    valid = 0
+    nodata_count = 0
+    total_sum = 0.0
+    total_sq = 0.0
+    vmin = None
+    vmax = None
+
+    for row0 in range(0, ds.height, chunk_rows):
+        n = min(chunk_rows, ds.height - row0)
+        block = ds.read(band, window=Window(0, row0, ds.width, n))
+        total += int(block.size)
+        flat = block.reshape(-1)
+        if nodata is not None:
+            flat = flat[flat != nodata]
+        nodata_count += int(block.size) - int(flat.size)
+        if flat.size == 0:
+            continue
+        valid += int(flat.size)
+        if is_8bit:
+            if signed:
+                flat = flat.astype("int16") + offset
+            for i in range(0, flat.size, hist_block):
+                hist += np.bincount(flat[i:i + hist_block].astype("intp"),
+                                    minlength=256)
+        else:
+            f = flat.astype("float64")
+            total_sum += float(f.sum())
+            total_sq += float((f * f).sum())
+            bmin = float(f.min())
+            bmax = float(f.max())
+            vmin = bmin if vmin is None else min(vmin, bmin)
+            vmax = bmax if vmax is None else max(vmax, bmax)
+
+    if valid == 0:
+        return {
+            "minimum": None, "maximum": None, "mean": None,
+            "standard_deviation": None, "valid_pixel_count": 0,
+            "nodata_pixel_count": nodata_count, "total_pixel_count": total,
+            "nodata": nodata, "percentiles": None, "histogram": None,
+            "scope": "whole raster",
+        }
+
+    if hist is not None:
+        # Exact 8-bit statistics straight from the histogram.
+        values = np.arange(256, dtype="float64") - offset
+        counts = hist.astype("float64")
+        total_sum = float((values * counts).sum())
+        total_sq = float(((values ** 2) * counts).sum())
+        present = np.nonzero(hist)[0]
+        vmin = float(present[0] - offset)
+        vmax = float(present[-1] - offset)
+
+    mean = total_sum / valid
+    var = max(total_sq / valid - mean * mean, 0.0)
+    percentiles = None
+    if hist is not None:
+        cum = np.cumsum(hist)
+        def _pct(p):
+            target = p / 100.0 * valid
+            i = int(np.searchsorted(cum, target, side="left"))
+            return float(i - offset)
+        percentiles = {f"p{p:02d}": _pct(p) for p in (2, 25, 50, 75, 98)}
+
+    return {
+        "available": True,
+        "minimum": vmin,
+        "maximum": vmax,
+        "mean": mean,
+        "standard_deviation": math.sqrt(var),
+        "valid_pixel_count": valid,
+        "nodata_pixel_count": nodata_count,
+        "total_pixel_count": total,
+        "nodata": nodata,
+        "nodata_value": nodata,
+        "percentiles": percentiles,
+        "histogram": (
+            {"bins": 256, "offset": offset, "counts": hist.tolist()}
+            if hist is not None else None
+        ),
+        "scope": "whole raster (all pixels read in chunks)",
+    }
 
 
 def compute_stats(array: np.ndarray, nodata) -> dict:

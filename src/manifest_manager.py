@@ -52,7 +52,9 @@ def build_entry(ctx: dict) -> dict:
     return {
         "id": ctx["dataset_id"],
         "name": ctx["dataset_name"],
-        "source_url": ctx["source_url"],
+        "source_url": ctx.get("source_url"),
+        "local_path": ctx.get("local_path"),
+        "access_mode": ctx.get("access_mode"),
         "viewer_url": ctx.get("viewer_url"),
         "original_filename": ctx["filename"],
         "original_format": meta.get("driver"),
@@ -67,8 +69,10 @@ def build_entry(ctx: dict) -> dict:
         },
         "geographic_extent": meta.get("geographic_bounds"),
         "resolution": {
-            "value": meta.get("pixel_resolution"),
-            "units": "metres/pixel",
+            "value": meta.get("pixel_resolution_m") or meta.get("pixel_resolution"),
+            "native_value": meta.get("pixel_resolution"),
+            "native_units": meta.get("pixel_resolution_native_units"),
+            "units": "metres/pixel (ground, on the Mars 2000 sphere)",
         },
         "data_type": meta.get("dtype"),
         "bands": meta.get("count"),

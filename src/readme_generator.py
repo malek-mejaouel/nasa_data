@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import os
 
+from . import config
+
 
 def _fmt(value, nd=6):
     if value is None:
@@ -21,7 +23,8 @@ def _fmt(value, nd=6):
     return str(value)
 
 
-def generate_readme(ctx: dict, doc: dict) -> str:
+def generate_readme(ctx: dict, doc: dict, local_ctx: dict | None = None,
+                    local_doc: dict | None = None) -> str:
     meta = ctx["raster_metadata"]
     src = ctx["source_metadata"]
     dims = doc["dimensions"]
@@ -222,7 +225,150 @@ def generate_readme(ctx: dict, doc: dict) -> str:
       "downloaded. Re-running updates `manifest.json` in place (entries are "
       "keyed by `id`) and refreshes this README.\n")
 
+    if local_doc:
+        _append_local_dataset(L, local_ctx, local_doc)
+
     return "\n".join(L)
+
+
+def _append_local_dataset(L: list, ctx: dict, doc: dict) -> None:
+    """Append Part B describing the locally supplied ressources/ GeoTIFF."""
+    a = L.append
+    d = doc["dataset"]
+    dims = doc["dimensions"]
+    coords = doc["coordinates"]
+    stats = doc["statistics"]
+    aois = doc["study_areas"]
+    proc = doc["processing"]
+    val = doc["validation"]
+
+    a("---\n")
+    a("# Part B — Second dataset: locally supplied `ressources/` GeoTIFF\n")
+    a("This dataset is a file provided directly in the project's `ressources/` "
+      "folder. Because it is on local disk it can be read in full, which is the "
+      "only way to obtain **exact whole-raster statistics** (the remote mosaic "
+      "has no overviews and is never fully transferred). The file is opened "
+      "read-only and is never modified.\n")
+
+    a("## B.1 Dataset overview\n")
+    a(f"- **Dataset name:** {d['name']}")
+    a(f"- **Dataset id:** `{ctx['dataset_id']}`")
+    a(f"- **Local path:** `{ctx.get('local_path')}`")
+    a(f"- **Format:** {d['format']} ({d['data_type']}, {d['bands']} band)")
+    a(f"- **Compression:** {d['compression']}")
+    a(f"- **Layout:** {'tiled' if dims.get('tiled') else 'stripped'} "
+      f"(block shapes: {dims.get('block_shapes')}); internal overviews: "
+      f"{'present' if dims.get('overviews') else 'none'}")
+    if d.get("file_size_bytes"):
+        a(f"- **File size (on disk):** {d['file_size_bytes']} bytes "
+          f"(≈ {d['file_size_bytes']/1e9:.2f} GB)")
+    a("- **Content:** panchromatic (grayscale) HiRISE mosaic of the Gale Crater "
+      "area; pixel values are image DN (0–255), **not** elevation.")
+    a("")
+
+    a("## B.2 Provenance and attribution\n")
+    a(f"- **Attribution / recommended citation:** {d['attribution']}")
+    if d.get("principle_authors"):
+        a(f"- **Principle authors:** {d['principle_authors']}")
+    a(f"- **Provenance note:** {ctx['source_metadata'].get('provenance_note')}")
+    a(f"- **Cross-check (viewer):** the file's footprint and CRS match the Mars "
+      f"Trek `{config.TREK_LAYER['layer_id']}` WMTS layer referenced by the "
+      f"supplied viewer URL.")
+    a("")
+
+    a("## B.3 Planetary reference system and CRS\n")
+    a("| Role | CRS | Definition |")
+    a("|---|---|---|")
+    a(f"| Original (as declared in the GeoTIFF) | {coords['original_crs']} | "
+      f"`{coords['original_crs_proj4']}` |")
+    a(f"| Storage / output (geographic) | {coords['storage_crs']} | "
+      f"`{coords['storage_crs_proj4']}` |")
+    a(f"| Compute (metric, Gale-centred) | {coords['compute_crs']} | "
+      f"`{coords['compute_crs_proj4']}` |")
+    a("")
+    a(f"Mars CRS validation: **{'PASSED' if coords['crs_validation'].get('mars_crs_verified') else 'FAILED'}** "
+      f"(`{json.dumps(coords['crs_validation'])}`).  ")
+    a("No Earth CRS is used; all CRS objects are built on the Mars 2000 sphere "
+      "(R = 3396190 m).\n")
+
+    a("## B.4 Dimensions and resolution\n")
+    a(f"- **Width × height:** {dims['width']} × {dims['height']} pixels "
+      f"({dims['width'] * dims['height']:,} total)")
+    res_m = dims.get("resolution") or []
+    res_native = dims.get("resolution_native") or []
+    a(f"- **Ground resolution:** {_fmt(res_m[0] if res_m else None)} m/pixel "
+      f"(on the Mars 2000 sphere)")
+    a(f"- **Native resolution:** {_fmt(res_native[0] if res_native else None)} "
+      f"degrees/pixel")
+    a("")
+
+    a("## B.5 Geographic coverage\n")
+    gb = coords["bounds_geographic"]
+    a(f"- **Geographic extent (lon/lat):** min_lon {_fmt(gb.get('min_lon'))}, "
+      f"min_lat {_fmt(gb.get('min_lat'))}, max_lon {_fmt(gb.get('max_lon'))}, "
+      f"max_lat {_fmt(gb.get('max_lat'))}")
+    a(f"- **Geotransform:** `{coords.get('geotransform')}`")
+    a("- This footprint is a subset of the regional orthophoto mosaic "
+      "(Part A) and matches the Curiosity traverse area shown by Mars Trek.\n")
+
+    a("## B.6 Exact whole-raster statistics\n")
+    if stats.get("available"):
+        a(f"Scope: **{stats.get('scope')}**. Computed from every pixel of the "
+          "file, with NoData excluded (the file declares none).")
+        a("")
+        a("| Metric | Value |")
+        a("|---|---|")
+        for k in ["minimum", "maximum", "mean", "standard_deviation",
+                  "valid_pixel_count", "nodata_pixel_count", "total_pixel_count"]:
+            a(f"| {k} | {_fmt(stats.get(k))} |")
+        if stats.get("percentiles"):
+            for k, v in stats["percentiles"].items():
+                a(f"| percentile {k} | {_fmt(v)} |")
+        a(f"| NoData value | {_fmt(stats.get('nodata_value'))} |")
+        hist = stats.get("histogram")
+        if hist:
+            populated = sum(1 for c in hist["counts"] if c)
+            a("")
+            a(f"> A full {hist['bins']}-bin histogram (offset {hist['offset']}, "
+              f"{populated} populated bins) is stored in the dataset JSON for "
+              "exact reproduction.")
+    else:
+        a(f"**Not available.** {stats.get('reason')}")
+    a("")
+    a("> These are **exact** global statistics, not a sampling of windows: the "
+      "local file is read in row chunks and an exact 256-bin histogram is "
+      "accumulated. This is the key piece of information that could not be "
+      "obtained from the remote source.\n")
+
+    a("## B.7 Study area intersection and extraction\n")
+    a("| AOI | Authoritative | Intersects | Coverage | Approx. native px | Extracted |")
+    a("|---|---|---|---|---|---|")
+    for name in ["gale_regional", "boxwork", "hidden_valley"]:
+        entry = aois.get(name, {})
+        px = entry.get("approx_native_pixels")
+        px_txt = f"{px['width']} × {px['height']}" if px else "n/a"
+        a(f"| {name} | {entry.get('authoritative')} | "
+          f"{entry.get('intersects_dataset')} | {entry.get('coverage')} | "
+          f"{px_txt} | {entry.get('extraction', {}).get('extracted')} |")
+    a("")
+
+    a("## B.8 Processing operations and output files\n")
+    for op in proc.get("operations", []):
+        a(f"- {op}")
+    a("")
+    a("**Output files:**")
+    for out in proc.get("output_files", []):
+        a(f"- `{out}`")
+    if not proc.get("output_files"):
+        a("- (none)")
+    a("")
+
+    a("## B.9 Limitations and assumptions\n")
+    for w in val.get("warnings", []):
+        a(f"- {w}")
+    for assumption in val.get("assumptions", []):
+        a(f"- {assumption}")
+    a("")
 
 
 def write_readme(path: str, text: str) -> None:

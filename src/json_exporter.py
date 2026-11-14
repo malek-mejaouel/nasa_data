@@ -36,8 +36,10 @@ def build_dataset_json(ctx: dict) -> dict:
         "dimensions": {
             "width": meta.get("width"),
             "height": meta.get("height"),
-            "resolution": meta.get("pixel_resolution"),
-            "resolution_units": "metres/pixel (native equirectangular, Mars sphere)",
+            "resolution": meta.get("pixel_resolution_m") or meta.get("pixel_resolution"),
+            "resolution_native": meta.get("pixel_resolution"),
+            "resolution_native_units": meta.get("pixel_resolution_native_units"),
+            "resolution_units": "metres/pixel (ground, on the Mars 2000 sphere)",
             "block_shapes": meta.get("block_shapes"),
             "tiled": meta.get("tiled"),
             "overviews": meta.get("overviews"),
@@ -74,7 +76,12 @@ def build_dataset_json(ctx: dict) -> dict:
             "assumptions": ctx.get("assumptions", []),
             "warnings": ctx.get("warnings", []),
         },
-        "remote_access": ctx.get("remote_access"),
+        "access": {
+            "mode": ctx.get("access_mode"),
+            "source_url": ctx.get("source_url"),
+            "local_path": ctx.get("local_path"),
+            "remote_access": ctx.get("remote_access"),
+        },
         "extraction_timestamp": ctx.get("extraction_timestamp"),
     }
     return doc

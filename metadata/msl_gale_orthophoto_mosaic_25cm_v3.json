@@ -24,7 +24,12 @@
       0.25,
       0.25
     ],
-    "resolution_units": "metres/pixel (native equirectangular, Mars sphere)",
+    "resolution_native": [
+      0.25,
+      0.25
+    ],
+    "resolution_native_units": "metres/pixel (projected)",
+    "resolution_units": "metres/pixel (ground, on the Mars 2000 sphere)",
     "block_shapes": [
       [
         1,
@@ -300,31 +305,36 @@
       "The viewer tutorial-tek CRS code 'EPSG::104905' is not resolvable by PROJ; the equivalent Mars sphere is IAU_2015:49900 (R = 3396190 m)."
     ]
   },
-  "remote_access": {
-    "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
-    "ok": true,
-    "status": 200,
-    "headers": {
-      "x-amz-id-2": "z+2XYqXDZFKXahLD0JIf0E5IW8ZxSVV5QfBvmM/Ty0SX1S85/S7h0mPSPQb1zsAPLxXCE3fd7ONNrUyUuZ5F1gPIS2wlyi5r",
-      "x-amz-request-id": "MDKYWV9RYNSA7NCV",
-      "server": "AmazonS3",
-      "date": "Sat, 14 Nov 2026 14:07:13 GMT",
-      "last-modified": "Thu, 01 Dec 2022 23:24:04 GMT",
+  "access": {
+    "mode": null,
+    "source_url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+    "local_path": null,
+    "remote_access": {
+      "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "x-amz-id-2": "e+rrJ5Rfm0U3HHB3+4R0ah90vq6D4LIVCpfZSIpUYgQG1qEIIISrLIfeRkn2Ua5fQNtSIEU8aBCfw2AzzK+Yi54DUnpag1b/",
+        "x-amz-request-id": "D1H9CKG617B64THF",
+        "server": "AmazonS3",
+        "date": "Sat, 14 Nov 2026 15:44:03 GMT",
+        "last-modified": "Thu, 01 Dec 2022 23:24:04 GMT",
+        "etag": "\"7ccac4c4f062c36a77565efd4c9501aa-6009\"",
+        "x-amz-storage-class": "STANDARD_IA",
+        "x-amz-version-id": "null",
+        "accept-ranges": "bytes",
+        "content-length": "50404480837",
+        "content-type": "image/tiff"
+      },
+      "content_type": "image/tiff",
+      "content_length": 50404480837,
+      "accept_ranges": true,
       "etag": "\"7ccac4c4f062c36a77565efd4c9501aa-6009\"",
-      "x-amz-storage-class": "STANDARD_IA",
-      "x-amz-version-id": "null",
-      "accept-ranges": "bytes",
-      "content-length": "50404480837",
-      "content-type": "image/tiff"
-    },
-    "content_type": "image/tiff",
-    "content_length": 50404480837,
-    "accept_ranges": true,
-    "etag": "\"7ccac4c4f062c36a77565efd4c9501aa-6009\"",
-    "last_modified": "Thu, 01 Dec 2022 23:24:04 GMT",
-    "range_status": 206,
-    "range_supported": true,
-    "content_range": "bytes 0-1023/50404480837"
+      "last_modified": "Thu, 01 Dec 2022 23:24:04 GMT",
+      "range_status": 206,
+      "range_supported": true,
+      "content_range": "bytes 0-1023/50404480837"
+    }
   },
-  "extraction_timestamp": "2026-11-14T15:10:30+01:00"
+  "extraction_timestamp": "2026-11-14T16:53:03+01:00"
 }

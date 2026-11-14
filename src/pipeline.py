@@ -72,27 +72,35 @@ def phase_3_extract() -> dict:
     return {"metadata": meta, "crs_validation": crs_val, "native_crs": native}
 
 
-def _extract_aoi(ds, name: str, bbox_lonlat) -> dict:
-    """Read one AOI window remotely, compute stats and reproject it."""
+def _extract_aoi(ds, name: str, bbox_lonlat, prefix: str = "",
+                 local: bool = False) -> dict:
+    """Read one AOI window, compute stats and reproject it.
+
+    ``local`` marks a read from a local file, which lifts the remote transfer
+    budget (no network cost) and changes only the reported read strategy.
+    """
     window, native_box = raster_reader.lonlat_bbox_to_window(ds, bbox_lonlat)
     w = int(round(window.width))
     h = int(round(window.height))
     npx = w * h
     banded = raster_reader.is_row_stripped(ds) and w < ds.width
     transfer = raster_reader.band_transfer_bytes(ds, window)
+    if local:
+        strategy = "direct local window read (tiled, LZW)"
+    elif banded:
+        strategy = "full-width row bands (contiguous on server) + local column slice"
+    else:
+        strategy = "direct window read"
     result = {
         "name": name, "window_pixels": npx, "window_size": [w, h],
         "transfer_bytes": transfer,
-        "read_strategy": (
-            "full-width row bands (contiguous on server) + local column slice"
-            if banded else "direct window read"
-        ),
+        "read_strategy": strategy,
         "extracted": False, "reason": None,
     }
     if npx <= 0:
         result["reason"] = "empty window (AOI outside dataset)"
         return result
-    if transfer > config.MAX_TRANSFER_BYTES:
+    if not local and transfer > config.MAX_TRANSFER_BYTES:
         result["reason"] = (
             f"window {w}x{h} would transfer {transfer/1e6:.0f} MB "
             f"(banded read), exceeding the {config.MAX_TRANSFER_BYTES/1e6:.0f} MB "
@@ -119,9 +127,10 @@ def _extract_aoi(ds, name: str, bbox_lonlat) -> dict:
 
     os.makedirs(config.PROCESSED_DIR, exist_ok=True)
     os.makedirs(config.OUTPUTS_DIR, exist_ok=True)
-    compute_path = os.path.join(config.PROCESSED_DIR, f"{name}_compute_aeqd_25cm.tif")
-    geo_path = os.path.join(config.PROCESSED_DIR, f"{name}_geographic_25cm.tif")
-    preview_path = os.path.join(config.OUTPUTS_DIR, f"{name}_preview.png")
+    compute_path = os.path.join(config.PROCESSED_DIR,
+                                f"{prefix}{name}_compute_aeqd_25cm.tif")
+    geo_path = os.path.join(config.PROCESSED_DIR, f"{prefix}{name}_geographic_25cm.tif")
+    preview_path = os.path.join(config.OUTPUTS_DIR, f"{prefix}{name}_preview.png")
 
     raster_reader.write_geotiff(compute_path, compute_arr, compute_transform, cmp_crs)
     raster_reader.write_geotiff(geo_path, geo_arr, geo_transform, geo_crs)
@@ -162,6 +171,193 @@ def phase_4_process(aoi_defs: dict) -> dict:
                     continue
                 results[name] = _extract_aoi(ds, name, definition["bbox"])
     return results
+
+
+def phase_local(aoi_defs: dict) -> dict:
+    """PHASE 3b/4b: fully process the locally supplied GeoTIFF (ressources/).
+
+    Because the file is on local disk it can be read in full, so *exact*
+    whole-raster statistics are computed (unlike the remote source) and the
+    AOI windows are extracted without any transfer budget.
+    """
+    print("[PHASE 3b] Reading local dataset (ressources/) ...")
+    if not os.path.exists(config.LOCAL_SOURCE_PATH):
+        print("  local source not found - skipping")
+        return {"available": False}
+
+    with rasterio.open(config.LOCAL_SOURCE_PATH) as ds:
+        meta = raster_reader.read_metadata(ds)
+        print(f"  {meta['width']}x{meta['height']} {meta['dtype']} "
+              f"crs={meta['crs_declared']} compression={meta['compression']}")
+        print("  computing whole-raster statistics (exact 256-bin histogram) ...")
+        t0 = time.time()
+        stats = raster_reader.compute_full_statistics(ds)
+        print(f"  done in {time.time() - t0:.0f}s: min={stats['minimum']} "
+              f"max={stats['maximum']} mean={stats['mean']:.2f} "
+              f"std={stats['standard_deviation']:.2f}")
+
+        print("[PHASE 4b] Extracting local AOI windows ...")
+        extractions = {}
+        for name, definition in aoi_defs.items():
+            if name == "aoi_gale_regional":
+                extractions[name] = {
+                    "name": name, "extracted": False,
+                    "reason": "regional footprint is analysed analytically only; "
+                              "a ~23 Gpx whole-file subset is out of scope",
+                }
+                continue
+            extractions[name] = _extract_aoi(
+                ds, name, definition["bbox"], prefix="curiosity_", local=True
+            )
+
+    native = CRS.from_wkt(meta["crs_declared_wkt"]) if meta.get("crs_declared_wkt") else None
+    crs_val = crs_manager.verify_mars_crs(native)
+    print(f"  Mars CRS verified: {crs_val['mars_crs_verified']}")
+
+    intersections = {}
+    for name in ("aoi_gale_regional", "aoi_boxwork", "aoi_hidden_valley"):
+        path = os.path.join(config.VECTOR_DIR, f"{name}.geojson")
+        intersections[name] = aoi_analyzer.analyze_intersection(
+            path, meta["geographic_bounds"], meta["pixel_resolution_m"]
+        )
+    return {
+        "available": True, "metadata": meta, "statistics": stats,
+        "crs_validation": crs_val, "native_crs": native,
+        "intersections": intersections, "extractions": extractions,
+    }
+
+
+def _study_areas(intersections: dict, extractions: dict) -> dict:
+    """Merge analytic intersections with the per-AOI extraction results."""
+    out = {}
+    for key, aoi_file in {
+        "gale_regional": "aoi_gale_regional",
+        "boxwork": "aoi_boxwork",
+        "hidden_valley": "aoi_hidden_valley",
+    }.items():
+        entry = dict(intersections[aoi_file])
+        extraction = extractions.get(aoi_file, {})
+        entry["extraction"] = {
+            "extracted": extraction.get("extracted", False),
+            "reason": extraction.get("reason"),
+            "window_size": extraction.get("window_size"),
+            "transfer_bytes": extraction.get("transfer_bytes"),
+            "read_strategy": extraction.get("read_strategy"),
+            "outputs": extraction.get("outputs"),
+            "statistics": extraction.get("statistics"),
+        }
+        out[key] = entry
+    return out
+
+
+def _output_files(extractions: dict) -> list:
+    files = []
+    for e in extractions.values():
+        if e.get("extracted"):
+            files.extend(e["outputs"].values())
+    return files
+
+
+def _local_dataset_ctx(local: dict) -> dict:
+    """Build the pipeline context for the locally supplied dataset.
+
+    Mirrors the remote-dataset context so that the same JSON exporter, manifest
+    builder and README generator can be reused. The only material difference is
+    the ``access`` mode (a local, read-only file) and the fact that *exact*
+    whole-raster statistics are available.
+    """
+    meta = local["metadata"]
+    native_crs = local["native_crs"]
+    extractions = local["extractions"]
+    study_areas = _study_areas(local["intersections"], extractions)
+    output_files = _output_files(extractions)
+    terrain = terrain_analyzer.assess(meta)
+    try:
+        size = os.path.getsize(config.LOCAL_SOURCE_PATH)
+    except OSError:
+        size = None
+
+    operations = [
+        "Local metadata extraction (rasterio, read-only)",
+        "Exact whole-raster statistics over every pixel (256-bin histogram)",
+        "Analytic AOI / footprint intersection analysis (shapely)",
+        "Full-resolution windowed extraction (direct local window read, tiled LZW)",
+        "Reprojection to the Gale-centred metric compute CRS (bilinear)",
+        "Reprojection to the geographic storage CRS (bilinear)",
+        "Quick-look preview rendering",
+    ]
+    resampling = (
+        "bilinear (continuous panchromatic imagery; nearest-neighbour "
+        "reserved for categorical rasters)"
+    )
+    assumptions = [
+        "The file in ressources/ is the locally supplied GeoTIFF whose footprint, "
+        "pixel size and CRS match the Mars Trek `curiosity_hirise_mosaic` WMTS "
+        "layer (urn:ogc:def:crs:EPSG::104905).",
+        "The upstream processing chain of this particular file is not documented "
+        "inside the file itself; its provenance is inferred from the matching "
+        "footprint, CRS and layer identifier.",
+        "The project study areas (aoi_gale_regional, aoi_boxwork, "
+        "aoi_hidden_valley) are shared with the remote mosaic dataset; "
+        "aoi_boxwork and aoi_hidden_valley are DERIVED placeholder windows, "
+        "not authoritative feature outlines.",
+        "The compute CRS is an Azimuthal Equidistant projection centred on Gale "
+        "Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m).",
+    ]
+    warnings = [
+        "Pixel values are 8-bit image DN (0-255), not elevation; terrain "
+        "derivatives are not applicable.",
+        "NoData is not declared by the file; every pixel is treated as valid.",
+        "This local file covers only the Curiosity rover traverse footprint, a "
+        "subset of the regional orthophoto mosaic.",
+    ]
+
+    return {
+        "dataset_id": config.LOCAL_DATASET_ID,
+        "dataset_name": config.LOCAL_DATASET_NAME,
+        "filename": config.LOCAL_DATASET_FILENAME,
+        "source_url": None,
+        "local_path": config.LOCAL_SOURCE_ADDRESS,
+        "access_mode": "local file (read-only)",
+        "viewer_url": config.VIEWER_URL,
+        "planet": config.PLANET,
+        "iau_identifier": config.IAU_IDENTIFIER,
+        "gale_center_lat": config.GALE_CENTER_LAT,
+        "gale_center_lon": config.GALE_CENTER_LON,
+        "raster_metadata": meta,
+        "source_metadata": config.LOCAL_SOURCE_METADATA,
+        "crs": {
+            "storage": crs_manager.describe(
+                crs_manager.geographic_crs(),
+                label="Mars 2000 Sphere / Ocentric (geographic, lon/lat)",
+            ),
+            "compute": crs_manager.describe(
+                crs_manager.compute_crs(),
+                label=(
+                    "Mars Gale-centred Azimuthal Equidistant "
+                    "(lat_0=-5.4, lon_0=137.8, R=3396190 m)"
+                ),
+            ),
+            "original": crs_manager.describe(native_crs),
+        },
+        "crs_validation": local["crs_validation"],
+        "statistics": local["statistics"],
+        "study_areas": study_areas,
+        "processing": {
+            "resampling_method": resampling,
+            "operations": operations,
+            "output_files": output_files,
+        },
+        "terrain": terrain,
+        "assumptions": assumptions,
+        "warnings": warnings,
+        "source_verified": True,
+        "remote_access": None,
+        "file_size_bytes": size,
+        "file_size_note": "size of the file on local disk (ressources/)",
+        "processing_status": "processed",
+        "extraction_timestamp": _now(),
+    }
 
 
 def _aggregate_statistics(extractions: dict) -> dict:
@@ -216,8 +412,8 @@ def _aggregate_statistics(extractions: dict) -> dict:
     }
 
 
-def phase_5_export(p2, p3, aoi_defs, intersections, extractions) -> dict:
-    """Phase 5: write AOIs, dataset JSON, previews, README and manifest."""
+def phase_5_export(p2, p3, aoi_defs, intersections, extractions, local=None) -> dict:
+    """Phase 5: write AOIs, dataset JSONs, previews, README and manifest."""
     print("[PHASE 5] Exporting artefacts ...")
     # data/raw holds original source datasets and must never be modified. The
     # source GeoTIFF is read remotely and is deliberately NOT downloaded here,
@@ -348,7 +544,23 @@ def phase_5_export(p2, p3, aoi_defs, intersections, extractions) -> dict:
 
     manifest_manager.upsert_dataset(manifest_manager.build_entry(ctx))
 
-    readme_generator.write_readme(config.README_PATH, readme_generator.generate_readme(ctx, doc))
+    # --- Second dataset: the locally supplied ressources/ GeoTIFF -----------
+    # Only this file allows *exact* whole-raster statistics (the remote mosaic
+    # has no overviews and is never fully transferred).
+    lctx = ldoc = ljson_path = None
+    if local and local.get("available"):
+        lctx = _local_dataset_ctx(local)
+        ldoc = json_exporter.build_dataset_json(lctx)
+        ljson_path = os.path.join(config.METADATA_DIR, f"{config.LOCAL_DATASET_ID}.json")
+        lctx["dataset_json_path"] = os.path.relpath(ljson_path, config.PROJECT_ROOT)
+        json_exporter.write_json(ljson_path, ldoc)
+        manifest_manager.upsert_dataset(manifest_manager.build_entry(lctx))
+        print(f"  wrote metadata/{config.LOCAL_DATASET_ID}.json")
+
+    readme_generator.write_readme(
+        config.README_PATH,
+        readme_generator.generate_readme(ctx, doc, lctx, ldoc),
+    )
 
     # A small machine-readable report of the URL inspection for traceability.
     json_exporter.write_json(
@@ -357,23 +569,24 @@ def phase_5_export(p2, p3, aoi_defs, intersections, extractions) -> dict:
          "trek_layer": config.TREK_LAYER},
     )
     print(f"  wrote metadata/{config.DATASET_ID}.json, README.md, manifest.json")
-    return {"doc": doc, "ctx": ctx, "json_path": json_path}
+    return {
+        "doc": doc, "ctx": ctx, "json_path": json_path,
+        "local_doc": ldoc, "local_ctx": lctx, "local_json_path": ljson_path,
+    }
 
 
-def phase_6_validate(export) -> dict:
-    """Phase 6: validate JSON syntax, outputs and CRS safety."""
-    print("[PHASE 6] Validating ...")
-    report = {"checks": [], "warnings": []}
+def _validate_dataset(ctx: dict, json_path: str, label: str) -> list:
+    """Run the JSON / output / CRS checks for one dataset context."""
+    checks = []
 
-    v = json_exporter.validate_json(export["json_path"])
-    report["checks"].append({"check": "dataset JSON valid", "ok": v["valid"],
-                             "detail": v.get("error")})
+    v = json_exporter.validate_json(json_path)
+    checks.append({"check": f"[{label}] dataset JSON valid", "ok": v["valid"],
+                   "detail": v.get("error")})
 
-    ctx = export["ctx"]
     missing = [f for f in ctx["processing"]["output_files"]
                if not os.path.exists(os.path.join(config.PROJECT_ROOT, f))]
-    report["checks"].append({"check": "all output files exist", "ok": not missing,
-                             "detail": missing or "ok"})
+    checks.append({"check": f"[{label}] all output files exist", "ok": not missing,
+                   "detail": missing or "ok"})
 
     # Ensure no Earth CRS leaked into any written GeoTIFF.
     bad = []
@@ -383,14 +596,37 @@ def phase_6_validate(export) -> dict:
                 c = CRS.from_wkt(ds.crs.to_wkt())
                 if crs_manager.is_earth_crs(c):
                     bad.append(f)
-    report["checks"].append({"check": "no Earth CRS in outputs", "ok": not bad,
-                             "detail": bad or "ok"})
+    checks.append({"check": f"[{label}] no Earth CRS in outputs", "ok": not bad,
+                   "detail": bad or "ok"})
 
-    report["checks"].append({
-        "check": "Mars CRS verified",
+    checks.append({
+        "check": f"[{label}] Mars CRS verified",
         "ok": ctx["crs_validation"].get("mars_crs_verified", False),
         "detail": ctx["crs_validation"],
     })
+    return checks
+
+
+def phase_6_validate(export) -> dict:
+    """Phase 6: validate JSON syntax, outputs and CRS safety."""
+    print("[PHASE 6] Validating ...")
+    report = {"checks": [], "warnings": []}
+
+    report["checks"].extend(
+        _validate_dataset(export["ctx"], export["json_path"], "remote")
+    )
+
+    if export.get("local_ctx"):
+        report["checks"].extend(
+            _validate_dataset(export["local_ctx"], export["local_json_path"], "local")
+        )
+        # The local source file must never be modified by the pipeline.
+        report["checks"].append({
+            "check": "[local] source file untouched (read-only)",
+            "ok": os.path.exists(config.LOCAL_SOURCE_PATH),
+            "detail": config.LOCAL_SOURCE_ADDRESS,
+        })
+
     report["checks"].append({
         "check": "source unmodified (remote, read-only)",
         "ok": True, "detail": "source opened read-only via /vsicurl/",
@@ -417,7 +653,8 @@ def main() -> int:
         )
 
     extractions = phase_4_process(aoi_defs)
-    export = phase_5_export(p2, p3, aoi_defs, intersections, extractions)
+    local = phase_local(aoi_defs)
+    export = phase_5_export(p2, p3, aoi_defs, intersections, extractions, local)
     report = phase_6_validate(export)
 
     ok = all(c["ok"] for c in report["checks"])

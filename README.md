@@ -45,7 +45,7 @@ Mars CRS validation: **PASSED** (`{"crs_present": true, "is_earth_crs": false, "
 ## 5. Raster dimensions and resolution
 
 - **Width × height:** 180000 × 280000 pixels
-- **Native resolution:** 0.25 m/pixel (metres/pixel (native equirectangular, Mars sphere))
+- **Native resolution:** 0.25 m/pixel (metres/pixel (ground, on the Mars 2000 sphere))
 - **Storage layout:** stripped (block shapes: [[1, 180000]])
 - **Internal overviews / COG:** none
 - **Compression:** none (uncompressed)
@@ -148,3 +148,110 @@ python -m src.pipeline
 ```
 
 The pipeline performs only HTTP Range reads of the source GeoTIFF via GDAL `/vsicurl/`; the original file is never modified or fully downloaded. Re-running updates `manifest.json` in place (entries are keyed by `id`) and refreshes this README.
+
+---
+
+# Part B — Second dataset: locally supplied `ressources/` GeoTIFF
+
+This dataset is a file provided directly in the project's `ressources/` folder. Because it is on local disk it can be read in full, which is the only way to obtain **exact whole-raster statistics** (the remote mosaic has no overviews and is never fully transferred). The file is opened read-only and is never modified.
+
+## B.1 Dataset overview
+
+- **Dataset name:** Mars Curiosity HiRISE Mosaic (Gale Crater)
+- **Dataset id:** `curiosity_hirise_mosaic`
+- **Local path:** `ressources/curiosity_hirise_mosaic.tif`
+- **Format:** GTiff (uint8, 1 band)
+- **Compression:** Compression.lzw
+- **Layout:** tiled (block shapes: [[128, 128]]); internal overviews: none
+- **File size (on disk):** 8605826726 bytes (≈ 8.61 GB)
+- **Content:** panchromatic (grayscale) HiRISE mosaic of the Gale Crater area; pixel values are image DN (0–255), **not** elevation.
+
+## B.2 Provenance and attribution
+
+- **Attribution / recommended citation:** Mars Curiosity HiRISE Mosaic, USGS Astrogeology Science Center, NASA Mars Trek (trek.nasa.gov).
+- **Principle authors:** USGS Astrogeology Science Center
+- **Provenance note:** Locally supplied GeoTIFF; its footprint and CRS match the Mars Trek `curiosity_hirise_mosaic` WMTS layer (urn:ogc:def:crs:EPSG::104905). The exact upstream processing chain of this particular file is not documented inside the file itself.
+- **Cross-check (viewer):** the file's footprint and CRS match the Mars Trek `curiosity_hirise_mosaic` WMTS layer referenced by the supplied viewer URL.
+
+## B.3 Planetary reference system and CRS
+
+| Role | CRS | Definition |
+|---|---|---|
+| Original (as declared in the GeoTIFF) | ESRI:104905 | `+proj=longlat +a=3396190 +rf=169.894447223612 +no_defs +type=crs` |
+| Storage / output (geographic) | Mars (2015) - Sphere / Ocentric | `+proj=longlat +R=3396190 +no_defs +type=crs` |
+| Compute (metric, Gale-centred) | Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m) | `+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs` |
+
+Mars CRS validation: **PASSED** (`{"crs_present": true, "is_earth_crs": false, "radius_ok": true, "mars_crs_verified": true, "notes": [], "declared_name": "GCS_Mars_2000", "declared_proj4": "+proj=longlat +a=3396190 +rf=169.894447223612 +no_defs +type=crs", "radius_m": 3396190.0}`).  
+No Earth CRS is used; all CRS objects are built on the Mars 2000 sphere (R = 3396190 m).
+
+## B.4 Dimensions and resolution
+
+- **Width × height:** 144001 × 160401 pixels (23,097,904,401 total)
+- **Ground resolution:** 0.25 m/pixel (on the Mars 2000 sphere)
+- **Native resolution:** 4.21765e-06 degrees/pixel
+
+## B.5 Geographic coverage
+
+- **Geographic extent (lon/lat):** min_lon 137.122, min_lat -4.92547, max_lon 137.73, max_lat -4.24896
+- **Geotransform:** `[4.217651214528874e-06, 0.0, 137.12246691438963, 0.0, -4.217651214528841e-06, -4.248958839494268]`
+- This footprint is a subset of the regional orthophoto mosaic (Part A) and matches the Curiosity traverse area shown by Mars Trek.
+
+## B.6 Exact whole-raster statistics
+
+Scope: **whole raster (all pixels read in chunks)**. Computed from every pixel of the file, with NoData excluded (the file declares none).
+
+| Metric | Value |
+|---|---|
+| minimum | 0 |
+| maximum | 255 |
+| mean | 144.253 |
+| standard_deviation | 38.3846 |
+| valid_pixel_count | 23097904401 |
+| nodata_pixel_count | 0 |
+| total_pixel_count | 23097904401 |
+| percentile p02 | 22 |
+| percentile p25 | 137 |
+| percentile p50 | 156 |
+| percentile p75 | 165 |
+| percentile p98 | 196 |
+| NoData value | not available |
+
+> A full 256-bin histogram (offset 0, 256 populated bins) is stored in the dataset JSON for exact reproduction.
+
+> These are **exact** global statistics, not a sampling of windows: the local file is read in row chunks and an exact 256-bin histogram is accumulated. This is the key piece of information that could not be obtained from the remote source.
+
+## B.7 Study area intersection and extraction
+
+| AOI | Authoritative | Intersects | Coverage | Approx. native px | Extracted |
+|---|---|---|---|---|---|
+| gale_regional | True | True | partially covered | 144001 × 160401 | False |
+| boxwork | False | True | fully covered | 1024 × 1024 | True |
+| hidden_valley | False | True | fully covered | 1024 × 1024 | True |
+
+## B.8 Processing operations and output files
+
+- Local metadata extraction (rasterio, read-only)
+- Exact whole-raster statistics over every pixel (256-bin histogram)
+- Analytic AOI / footprint intersection analysis (shapely)
+- Full-resolution windowed extraction (direct local window read, tiled LZW)
+- Reprojection to the Gale-centred metric compute CRS (bilinear)
+- Reprojection to the geographic storage CRS (bilinear)
+- Quick-look preview rendering
+
+**Output files:**
+- `data\processed\curiosity_aoi_boxwork_compute_aeqd_25cm.tif`
+- `data\processed\curiosity_aoi_boxwork_geographic_25cm.tif`
+- `outputs\curiosity_aoi_boxwork_preview.png`
+- `data\processed\curiosity_aoi_hidden_valley_compute_aeqd_25cm.tif`
+- `data\processed\curiosity_aoi_hidden_valley_geographic_25cm.tif`
+- `outputs\curiosity_aoi_hidden_valley_preview.png`
+
+## B.9 Limitations and assumptions
+
+- Pixel values are 8-bit image DN (0-255), not elevation; terrain derivatives are not applicable.
+- NoData is not declared by the file; every pixel is treated as valid.
+- This local file covers only the Curiosity rover traverse footprint, a subset of the regional orthophoto mosaic.
+- The file in ressources/ is the locally supplied GeoTIFF whose footprint, pixel size and CRS match the Mars Trek `curiosity_hirise_mosaic` WMTS layer (urn:ogc:def:crs:EPSG::104905).
+- The upstream processing chain of this particular file is not documented inside the file itself; its provenance is inferred from the matching footprint, CRS and layer identifier.
+- The project study areas (aoi_gale_regional, aoi_boxwork, aoi_hidden_valley) are shared with the remote mosaic dataset; aoi_boxwork and aoi_hidden_valley are DERIVED placeholder windows, not authoritative feature outlines.
+- The compute CRS is an Azimuthal Equidistant projection centred on Gale Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m).
