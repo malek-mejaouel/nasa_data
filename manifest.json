@@ -1,0 +1,70 @@
+{
+  "manifest_version": 1,
+  "planet": "Mars",
+  "iau_identifier": 49900,
+  "description": "Central index of all datasets handled by this project.",
+  "datasets": [
+    {
+      "id": "msl_gale_orthophoto_mosaic_25cm_v3",
+      "name": "Mars MSL Gale Merged Orthophoto Mosaic 25cm",
+      "source_url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+      "viewer_url": "https://trek.nasa.gov/mars/#v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn%3Aogc%3Adef%3Acrs%3AEPSG%3A%3A104905&d=&l=curiosity_hirise_mosaic%2Ctrue%2C1&l=Gale_CTX_BlockAdj_dd%2Ctrue%2C1&locale=&b=mars&e=137.05509596012425%2C-5.044352922849646%2C137.95460155857964%2C-4.129741123504169&sfz=&w=",
+      "original_filename": "MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+      "original_format": "GTiff",
+      "planet": "Mars",
+      "iau_identifier": 49900,
+      "crs": {
+        "original": "PROJCS[\"Mars_Equirectangular_clon0\",GEOGCS[\"GCS_Mars_2000_Sphere\",DATUM[\"Mars_2000_(Sphere)\",SPHEROID[\"Mars_2000_Sphere_IAU_IAG\",3396190,0],AUTHORITY[\"ESRI\",\"106971\"]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+        "storage": "Mars (2015) - Sphere / Ocentric",
+        "compute": "Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m)",
+        "storage_proj4": "+proj=longlat +R=3396190 +no_defs +type=crs",
+        "compute_proj4": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs"
+      },
+      "geographic_extent": {
+        "min_lon": 137.09471898704908,
+        "max_lon": 137.85389620566426,
+        "min_lat": -5.249524890070563,
+        "max_lat": -4.068582550002498
+      },
+      "resolution": {
+        "value": [
+          0.25,
+          0.25
+        ],
+        "units": "metres/pixel"
+      },
+      "data_type": "uint8",
+      "bands": 1,
+      "file_size_bytes": 50404480837,
+      "processing_status": "processed",
+      "output_files": [
+        "data\\processed\\aoi_boxwork_compute_aeqd_25cm.tif",
+        "data\\processed\\aoi_boxwork_geographic_25cm.tif",
+        "outputs\\aoi_boxwork_preview.png",
+        "data\\processed\\aoi_hidden_valley_compute_aeqd_25cm.tif",
+        "data\\processed\\aoi_hidden_valley_geographic_25cm.tif",
+        "outputs\\aoi_hidden_valley_preview.png"
+      ],
+      "dataset_json": "metadata\\msl_gale_orthophoto_mosaic_25cm_v3.json",
+      "extraction_timestamp": "2026-11-14T15:10:30+01:00",
+      "validation_status": {
+        "mars_crs_verified": true,
+        "source_verified": true
+      },
+      "warnings": [
+        "Source is a 50.4 GB uncompressed, stripped TIFF with 1-row strips and no internal overviews; efficient decimated remote reads are not possible.",
+        "Global (whole-raster) statistics were NOT computed.",
+        "Publisher lists the file as ~23 GB; actual HTTP Content-Length is ~50.4 GB.",
+        "Pixel values are image DN (0-255), not elevation; terrain derivatives are not applicable.",
+        "The viewer tutorial-tek CRS code 'EPSG::104905' is not resolvable by PROJ; the equivalent Mars sphere is IAU_2015:49900 (R = 3396190 m)."
+      ],
+      "assumptions": [
+        "The supplied URL is a browser viewer; the underlying original raster was identified as the USGS Astropedia MSL Gale Merged Orthophoto Mosaic (v3) GeoTIFF on AWS S3.",
+        "aoi_gale_regional is the dataset footprint as declared by USGS (authoritative).",
+        "aoi_boxwork and aoi_hidden_valley are DERIVED placeholder windows: 1024 x 1024 native pixels (256 m) located by centre fractions of the dataset extent. They are NOT authoritative feature outlines and must not be used as such.",
+        "The compute CRS is an Azimuthal Equidistant projection centred on Gale Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m)."
+      ],
+      "attribution": "Calef III, F. J., & Parker, T. (2016). MSL Gale Merged Orthophoto Mosaic. PDS Annex, U.S. Geological Survey."
+    }
+  ]
+}

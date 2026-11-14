@@ -1,0 +1,70 @@
+{
+  "viewer": {
+    "url": "https://trek.nasa.gov/mars/#v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn%3Aogc%3Adef%3Acrs%3AEPSG%3A%3A104905&d=&l=curiosity_hirise_mosaic%2Ctrue%2C1&l=Gale_CTX_BlockAdj_dd%2Ctrue%2C1&locale=&b=mars&e=137.05509596012425%2C-5.044352922849646%2C137.95460155857964%2C-4.129741123504169&sfz=&w=",
+    "scheme": "https",
+    "host": "trek.nasa.gov",
+    "path": "/mars/",
+    "query": "",
+    "is_fragment_app": true,
+    "resource_type": "map_viewer",
+    "confidence": "high",
+    "notes": [
+      "Recognised viewer host: NASA Solar System Treks (browser viewer)"
+    ],
+    "app_fragment": "v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn:ogc:def:crs:EPSG::104905&d=&l=curiosity_hirise_mosaic,true,1&l=Gale_CTX_BlockAdj_dd,true,1&locale=&b=mars&e=137.05509596012425,-5.044352922849646,137.95460155857964,-4.129741123504169&sfz=&w=",
+    "view_center": {
+      "x_lon": 137.50484875935194,
+      "y_lat": -4.587047023176908,
+      "zoom": 9.0
+    },
+    "projection_param": "urn:ogc:def:crs:EPSG::104905",
+    "body": "mars",
+    "layers": [
+      "curiosity_hirise_mosaic",
+      "Gale_CTX_BlockAdj_dd"
+    ],
+    "extent_lon_lat_bbox": [
+      137.05509596012425,
+      -5.044352922849646,
+      137.95460155857964,
+      -4.129741123504169
+    ]
+  },
+  "source_http": {
+    "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+    "ok": true,
+    "status": 200,
+    "headers": {
+      "x-amz-id-2": "z+2XYqXDZFKXahLD0JIf0E5IW8ZxSVV5QfBvmM/Ty0SX1S85/S7h0mPSPQb1zsAPLxXCE3fd7ONNrUyUuZ5F1gPIS2wlyi5r",
+      "x-amz-request-id": "MDKYWV9RYNSA7NCV",
+      "server": "AmazonS3",
+      "date": "Sat, 14 Nov 2026 14:07:13 GMT",
+      "last-modified": "Thu, 01 Dec 2022 23:24:04 GMT",
+      "etag": "\"7ccac4c4f062c36a77565efd4c9501aa-6009\"",
+      "x-amz-storage-class": "STANDARD_IA",
+      "x-amz-version-id": "null",
+      "accept-ranges": "bytes",
+      "content-length": "50404480837",
+      "content-type": "image/tiff"
+    },
+    "content_type": "image/tiff",
+    "content_length": 50404480837,
+    "accept_ranges": true,
+    "etag": "\"7ccac4c4f062c36a77565efd4c9501aa-6009\"",
+    "last_modified": "Thu, 01 Dec 2022 23:24:04 GMT",
+    "range_status": 206,
+    "range_supported": true,
+    "content_range": "bytes 0-1023/50404480837"
+  },
+  "trek_layer": {
+    "layer_id": "curiosity_hirise_mosaic",
+    "wmts_capabilities": "https://trek.nasa.gov/tiles/Mars/EQ/curiosity_hirise_mosaic/1.0.0/WMTSCapabilities.xml",
+    "wmts_crs": "urn:ogc:def:crs:EPSG::104905",
+    "bbox_lon_lat": [
+      137.1224669,
+      -4.9254743,
+      137.7298129,
+      -4.2489588
+    ]
+  }
+}

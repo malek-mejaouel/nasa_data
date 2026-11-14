@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "name": "aoi_gale_regional",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:IAU_2015::49900"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "aoi_gale_regional",
+        "planet": "Mars",
+        "iau_identifier": 49900,
+        "crs": "IAU_2015:49900 (Mars 2000 sphere, R=3396190 m, planetocentric)",
+        "longitude_convention": "east-positive, -180..180",
+        "authoritative": true,
+        "assumption": false,
+        "derived_from": "USGS Astropedia dataset footprint",
+        "description": "Regional Gale Crater study area. Defined as the full footprint of the MSL Gale Merged Orthophoto Mosaic (v3) as declared by USGS Astropedia. This is the only AOI with an authoritative basis."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              137.094719,
+              -5.249525
+            ],
+            [
+              137.853896,
+              -5.249525
+            ],
+            [
+              137.853896,
+              -4.068583
+            ],
+            [
+              137.094719,
+              -4.068583
+            ],
+            [
+              137.094719,
+              -5.249525
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

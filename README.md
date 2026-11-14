@@ -1,0 +1,150 @@
+# Mars Gale Crater — Curiosity GeoTIFF Extraction & Documentation Pipeline
+
+Planet: **Mars** · IAU body identifier: **49900** · Reference body: **Mars 2000 sphere (R = 3396190 m)**.  
+No Earth coordinate reference system is used anywhere in this project.
+
+---
+
+## 1. Dataset overview
+
+- **Dataset name:** Mars MSL Gale Merged Orthophoto Mosaic 25cm
+- **Dataset id:** `msl_gale_orthophoto_mosaic_25cm_v3`
+- **Original filename:** `MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif`
+- **Format:** GTiff (uint8, 1 band)
+- **Content:** panchromatic (grayscale) orthophoto mosaic of Gale Crater; pixel values are image DN (0–255), **not** elevation.
+- **File size (HTTP Content-Length):** 50404480837 bytes (≈ 50.4 GB)
+
+## 2. Original source URL and attribution
+
+- **Source URL:** https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif
+- **Viewer URL (supplied by user):** https://trek.nasa.gov/mars/#v=0.1&x=137.50484875935194&y=-4.587047023176908&z=9&p=urn%3Aogc%3Adef%3Acrs%3AEPSG%3A%3A104905&d=&l=curiosity_hirise_mosaic%2Ctrue%2C1&l=Gale_CTX_BlockAdj_dd%2Ctrue%2C1&locale=&b=mars&e=137.05509596012425%2C-5.044352922849646%2C137.95460155857964%2C-4.129741123504169&sfz=&w=
+- **Attribution / recommended citation:** Calef III, F. J., & Parker, T. (2016). MSL Gale Merged Orthophoto Mosaic. PDS Annex, U.S. Geological Survey.
+- **Principle authors:** Fred J. Calef III and Timothy Parker
+- **Publisher:** USGS Astrogeology Science Center (published 2016-10-20, version 3)
+
+## 3. Planetary reference system
+
+- **Planet / body identifier:** Mars / IAU 49900
+- **Reference body:** Mars 2000 sphere (planetocentric)
+- **Vertical / horizontal datum:** MOLA control net (per publisher record)
+- **Latitude type:** planetocentric (planetocentric)
+- **Longitude convention:** east-positive, range [-180, 180]
+- **Native map projection (publisher):** Equirectangular
+
+## 4. Original and output CRS
+
+| Role | CRS | Definition |
+|---|---|---|
+| Original (as declared in the GeoTIFF) | PROJCS["Mars_Equirectangular_clon0",GEOGCS["GCS_Mars_2000_Sphere",DATUM["Mars_2000_(Sphere)",SPHEROID["Mars_2000_Sphere_IAU_IAG",3396190,0],AUTHORITY["ESRI","106971"]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]]],PROJECTION["Equirectangular"],PARAMETER["standard_parallel_1",0],PARAMETER["central_meridian",0],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]] | `+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs` |
+| Storage / output (geographic) | Mars (2015) - Sphere / Ocentric | `+proj=longlat +R=3396190 +no_defs +type=crs` |
+| Compute (metric, Gale-centred) | Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m) | `+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs` |
+
+Mars CRS validation: **PASSED** (`{"crs_present": true, "is_earth_crs": false, "radius_ok": true, "mars_crs_verified": true, "notes": [], "declared_name": "Mars_Equirectangular_clon0", "declared_proj4": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs", "radius_m": 3396190.0}`).
+> The compute CRS is centred on Gale Crater (lat_0 = -5.4°, lon_0 = 137.8°) on the Mars 2000 sphere and uses metres for distance and area.
+
+## 5. Raster dimensions and resolution
+
+- **Width × height:** 180000 × 280000 pixels
+- **Native resolution:** 0.25 m/pixel (metres/pixel (native equirectangular, Mars sphere))
+- **Storage layout:** stripped (block shapes: [[1, 180000]])
+- **Internal overviews / COG:** none
+- **Compression:** none (uncompressed)
+
+## 6. Geographic coverage
+
+- **Geographic extent (lon/lat):** min_lon 137.095, min_lat -5.24952, max_lon 137.854, max_lat -4.06858
+- **Native extent (metres):** left 8.12625e+06, bottom -311164, right 8.17125e+06, top -241164
+- **Geotransform:** `[0.25, 0.0, 8126248.0, 0.0, -0.25, -241164.0]`
+
+## 7. Extracted statistics
+
+Computed from **full-resolution pixel windows extracted for the derived AOI sub-areas (NOT whole-raster; the source has no overviews)**.
+
+| Metric | Value |
+|---|---|
+| minimum | 36 |
+| maximum | 255 |
+| mean | 158.307 |
+| standard_deviation | 33.8035 |
+| valid_pixel_count | 2097152 |
+| nodata_pixel_count | 0 |
+| total_pixel_count | 2097152 |
+| NoData value | 0 |
+
+> Distinction: values above are **calculated** from actual source pixels; they are not copied from the publisher record. Global whole-raster statistics were not computed because that would require transferring the full ~50 GB dataset over HTTP (no internal overviews exist).
+
+## 8. Study area intersection results
+
+| AOI | Authoritative | Intersects | Coverage | Fraction covered | Approx. native px |
+|---|---|---|---|---|---|
+| gale_regional | True | True | fully covered | 1 | 180000 × 280000 |
+| boxwork | False | True | fully covered | 1 | 1024 × 1024 |
+| hidden_valley | False | True | fully covered | 1 | 1024 × 1024 |
+
+## 9. Processing operations
+
+- HTTP Range inspection of the source GeoTIFF (no full download)
+- Remote metadata extraction via GDAL /vsicurl/
+- Analytic AOI / footprint intersection analysis (shapely)
+- Full-resolution windowed extraction using full-width row bands (contiguous on the server) with local column slicing (GDAL partial reads; HTTP/2 multiplexing enabled)
+- Reprojection to the Gale-centred metric compute CRS (bilinear)
+- Reprojection to the geographic storage CRS (bilinear)
+- Quick-look preview rendering
+
+**Output files:**
+- `data\processed\aoi_boxwork_compute_aeqd_25cm.tif`
+- `data\processed\aoi_boxwork_geographic_25cm.tif`
+- `outputs\aoi_boxwork_preview.png`
+- `data\processed\aoi_hidden_valley_compute_aeqd_25cm.tif`
+- `data\processed\aoi_hidden_valley_geographic_25cm.tif`
+- `outputs\aoi_hidden_valley_preview.png`
+
+## 10. Resampling decisions
+
+- Primary resampling method: **bilinear (continuous panchromatic orthophoto; nearest-neighbour reserved for categorical rasters)**.
+- Rationale: the mosaic is a **continuous** panchromatic orthophoto, so bilinear interpolation is used. Nearest-neighbour is reserved for categorical/classification rasters, which this dataset is not.
+- NoData (0) is preserved through processing.
+
+## 11. Data limitations and uncertainties
+
+- The source is a **50.4 GB uncompressed, stripped TIFF** with a 1-row-per-strip layout and **no internal overviews**. Efficient decimated remote reading is therefore not possible; whole-raster processing or global statistics would require downloading the full file.
+- Windowed reads over HTTP are slow: with 1 row per strip a box window would need one request per row. The pipeline therefore reads the AOI's rows as **full-width bands** (contiguous on the server, ~184 MB per 1024-row band) and slices the columns locally. Each AOI still takes a few minutes to fetch, which is why the derived AOI windows are kept small (1024 px ≈ 256 m).
+- Horizontal accuracy is inherited from the MOLA control net (~100 m horizontal per the publisher record).
+- Pixel values are image DN, not calibrated radiance/reflectance and not elevation; no terrain interpretation is valid from this product alone.
+- The publisher lists the file as “23 GB” while the actual HTTP Content-Length is ~50.4 GB (uncompressed).
+
+## 12. Assumptions
+
+- The supplied URL is a browser viewer; the underlying original raster was identified as the USGS Astropedia MSL Gale Merged Orthophoto Mosaic (v3) GeoTIFF on AWS S3.
+- aoi_gale_regional is the dataset footprint as declared by USGS (authoritative).
+- aoi_boxwork and aoi_hidden_valley are DERIVED placeholder windows: 1024 x 1024 native pixels (256 m) located by centre fractions of the dataset extent. They are NOT authoritative feature outlines and must not be used as such.
+- The compute CRS is an Azimuthal Equidistant projection centred on Gale Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m).
+
+## 13. Generated output files
+
+| Kind | Path |
+|---|---|
+| Dataset JSON | `metadata/msl_gale_orthophoto_mosaic_25cm_v3.json` |
+| URL inspection report | `metadata/url_inspection.json` |
+| AOI geometries | `data/vector/aoi_gale_regional.geojson`, `data/vector/aoi_boxwork.geojson`, `data/vector/aoi_hidden_valley.geojson` |
+| Processed raster / preview | `data\processed\aoi_boxwork_compute_aeqd_25cm.tif` |
+| Processed raster / preview | `data\processed\aoi_boxwork_geographic_25cm.tif` |
+| Processed raster / preview | `outputs\aoi_boxwork_preview.png` |
+| Processed raster / preview | `data\processed\aoi_hidden_valley_compute_aeqd_25cm.tif` |
+| Processed raster / preview | `data\processed\aoi_hidden_valley_geographic_25cm.tif` |
+| Processed raster / preview | `outputs\aoi_hidden_valley_preview.png` |
+| Manifest | `manifest.json` |
+
+`data/raw/` is reserved for original source datasets and is intentionally empty here: the original GeoTIFF is accessed remotely and is never downloaded into the project. It is never modified.
+
+## 14. Reproducibility instructions
+
+Dependencies are installed into a project-local folder to avoid touching the read-only global environment:
+
+```powershell
+python -m pip install --target .\.pylibs rasterio pyproj geopandas shapely
+$env:PYTHONPATH = "$PWD\.pylibs"
+python -m src.pipeline
+```
+
+The pipeline performs only HTTP Range reads of the source GeoTIFF via GDAL `/vsicurl/`; the original file is never modified or fully downloaded. Re-running updates `manifest.json` in place (entries are keyed by `id`) and refreshes this README.

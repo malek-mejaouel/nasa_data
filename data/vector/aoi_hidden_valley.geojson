@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "name": "aoi_hidden_valley",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:IAU_2015::49900"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "aoi_hidden_valley",
+        "planet": "Mars",
+        "iau_identifier": 49900,
+        "crs": "IAU_2015:49900 (Mars 2000 sphere, R=3396190 m, planetocentric)",
+        "longitude_convention": "east-positive, -180..180",
+        "authoritative": false,
+        "assumption": true,
+        "derived_from": "centre at 0.12,0.47 of the dataset footprint; 1024 px square (0.25 m/px) on the Mars 2000 sphere",
+        "description": "Placeholder window derived from the dataset extent (western sub-box, 1024 x 1024 native pixels = 256 m). NOT an authoritative outline of 'Hidden Valley'."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              137.18366080257815,
+              -4.696641697421839
+            ],
+            [
+              137.18797967742185,
+              -4.696641697421839
+            ],
+            [
+              137.18797967742185,
+              -4.692322822578161
+            ],
+            [
+              137.18366080257815,
+              -4.692322822578161
+            ],
+            [
+              137.18366080257815,
+              -4.696641697421839
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
