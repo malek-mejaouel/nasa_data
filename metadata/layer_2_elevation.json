@@ -1,0 +1,260 @@
+{
+  "layer": {
+    "id": "layer_2_elevation",
+    "order": 2,
+    "name": "Elevation",
+    "kind": "raster",
+    "data_class": "continuous",
+    "resampling": "bilinear",
+    "status": "processed",
+    "vertical_unit": "metre",
+    "source_descriptor": {
+      "kind": "remote_url",
+      "ref": "https://planetarymaps.usgs.gov/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif",
+      "vsi": "/vsicurl/https://planetarymaps.usgs.gov/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif",
+      "dataset_id": "msl_gale_merged_dem_1m_v3",
+      "output_basename": "dem"
+    },
+    "output_basename": null
+  },
+  "coordinates": {
+    "planet": "Mars",
+    "iau_identifier": 49900,
+    "storage_crs": {
+      "name": "Mars (2015) - Sphere / Ocentric",
+      "proj4": "+proj=longlat +R=3396190 +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Geodetic latitude",
+          "unit": "degree",
+          "direction": "north"
+        },
+        {
+          "name": "Geodetic longitude",
+          "unit": "degree",
+          "direction": "east"
+        }
+      ],
+      "is_earth": false
+    },
+    "compute_crs": {
+      "name": "Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m)",
+      "proj4": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Easting",
+          "unit": "metre",
+          "direction": "east"
+        },
+        {
+          "name": "Northing",
+          "unit": "metre",
+          "direction": "north"
+        }
+      ],
+      "is_earth": false
+    },
+    "longitude_convention": "east-positive",
+    "longitude_range": [
+      -180,
+      180
+    ],
+    "latitude_type": "planetocentric"
+  },
+  "source_resolution": {
+    "value_m": [
+      1.0,
+      1.0
+    ],
+    "native_value": [
+      1.0,
+      1.0
+    ],
+    "native_units": "metres/pixel (projected)",
+    "units": "metres/pixel (ground, on the Mars 2000 sphere)"
+  },
+  "source_metadata": {
+    "publisher": "USGS Astrogeology Science Center",
+    "product": "Mars MSL Gale Merged DEM Mosaic 1 m (v3)",
+    "product_page": "https://astrogeology.usgs.gov/search/map/mars_msl_gale_merged_dem_1m",
+    "recommended_citation": "Mars MSL Gale Merged DEM Mosaic 1 m, USGS Astrogeology Science Center, PDS Annex.",
+    "vertical_crs_units": "Meters (metres) \u2014 stated by the publisher record",
+    "map_projection_name": "Equirectangular (projected, metres)",
+    "latitude_type": "Planetocentric",
+    "longitude_direction": "Positive East",
+    "longitude_domain": "-180 to 180",
+    "radius_m": 3396190,
+    "control_net": "MOLA",
+    "declared_resolution_m": 1.0,
+    "native_crs_epsg_like": "ESRI:103885 (Mars_2000_Equidistant_Cylindrical_sphere)",
+    "content_length_bytes": 3868256546,
+    "provenance_note": "Direct GeoTIFF resolved from the supplied Astropedia product page. Vertical units are taken from the publisher record, not measured."
+  },
+  "calculated": {
+    "vertical_unit": "metre",
+    "terrain": {
+      "terrain_analysis_applicable": true,
+      "reason": "Elevation keywords and metre units present.",
+      "evidence": [
+        "Band description and vertical unit were not embedded in the GeoTIFF; they were taken from the authoritative USGS Astropedia product record (https://astrogeology.usgs.gov/search/map/mars_msl_gale_merged_dem_1m).",
+        "Publisher-declared vertical units: Meters (metres) \u2014 stated by the publisher record."
+      ]
+    },
+    "aois": {
+      "aoi_gale_regional": {
+        "aoi": "aoi_gale_regional",
+        "window_size": [
+          32980,
+          57440
+        ],
+        "window_pixels": 1894371200,
+        "transfer_bytes": 7577484800,
+        "read_strategy": "direct window read",
+        "computed": false,
+        "reason": "window 32980x57440 would transfer 7577 MB, exceeding the 600 MB per-AOI budget; skipped"
+      },
+      "aoi_boxwork": {
+        "aoi": "aoi_boxwork",
+        "window_size": [
+          256,
+          256
+        ],
+        "window_pixels": 65536,
+        "transfer_bytes": 33771520,
+        "read_strategy": "full-width row bands (contiguous on server) + local column slice",
+        "computed": true,
+        "reason": null,
+        "source_read_seconds": 11.8,
+        "elevation_statistics_m": {
+          "minimum": -2757.39501953125,
+          "maximum": -2683.69287109375,
+          "mean": -2725.4372235760093,
+          "standard_deviation": 18.91671635286564,
+          "valid_pixel_count": 65536,
+          "nodata_pixel_count": 0,
+          "total_pixel_count": 65536,
+          "percentiles": {
+            "p02": -2754.5712890625,
+            "p25": -2740.7296142578125,
+            "p50": -2729.6571044921875,
+            "p75": -2711.0079345703125,
+            "p98": -2689.488623046875
+          }
+        },
+        "relief_m": 73.7021484375,
+        "slope_stats_deg": {
+          "min": 0.04423465028757532,
+          "max": 78.98003253776541,
+          "mean": 19.9170246301346,
+          "std": 16.06738446458012
+        },
+        "aspect_stats_deg": {
+          "min": 0.0,
+          "max": 359.9984233846207,
+          "mean": 176.57535346549145,
+          "std": 127.82370700328943
+        },
+        "method": "Horn (1981), 3x3 kernel",
+        "pixel_size_m": 1.0,
+        "outputs": {
+          "elevation_compute_geotiff": "data\\processed\\dem_aoi_boxwork_compute_aeqd_1m.tif",
+          "elevation_geographic_geotiff": "data\\processed\\dem_aoi_boxwork_geographic_1m.tif",
+          "slope_compute_geotiff": "data\\processed\\dem_aoi_boxwork_slope_compute_aeqd_1m.tif",
+          "elevation_preview_png": "outputs\\dem_aoi_boxwork_elevation_preview.png",
+          "slope_preview_png": "outputs\\dem_aoi_boxwork_slope_preview.png"
+        }
+      },
+      "aoi_hidden_valley": {
+        "aoi": "aoi_hidden_valley",
+        "window_size": [
+          256,
+          256
+        ],
+        "window_pixels": 65536,
+        "transfer_bytes": 33771520,
+        "read_strategy": "full-width row bands (contiguous on server) + local column slice",
+        "computed": true,
+        "reason": null,
+        "source_read_seconds": 11.2,
+        "elevation_statistics_m": {
+          "minimum": -4488.50341796875,
+          "maximum": -4478.43310546875,
+          "mean": -4482.796951368451,
+          "standard_deviation": 2.267361934560337,
+          "valid_pixel_count": 65536,
+          "nodata_pixel_count": 0,
+          "total_pixel_count": 65536,
+          "percentiles": {
+            "p02": -4487.25048828125,
+            "p25": -4484.42138671875,
+            "p50": -4483.20166015625,
+            "p75": -4480.96337890625,
+            "p98": -4478.7431640625
+          }
+        },
+        "relief_m": 10.0703125,
+        "slope_stats_deg": {
+          "min": 0.0,
+          "max": 48.21705063577082,
+          "mean": 2.4872185984044837,
+          "std": 6.605055667522307
+        },
+        "aspect_stats_deg": {
+          "min": 0.0,
+          "max": 359.4705247395845,
+          "mean": 247.67427302774877,
+          "std": 57.78171880962613
+        },
+        "method": "Horn (1981), 3x3 kernel",
+        "pixel_size_m": 1.0,
+        "outputs": {
+          "elevation_compute_geotiff": "data\\processed\\dem_aoi_hidden_valley_compute_aeqd_1m.tif",
+          "elevation_geographic_geotiff": "data\\processed\\dem_aoi_hidden_valley_geographic_1m.tif",
+          "slope_compute_geotiff": "data\\processed\\dem_aoi_hidden_valley_slope_compute_aeqd_1m.tif",
+          "elevation_preview_png": "outputs\\dem_aoi_hidden_valley_elevation_preview.png",
+          "slope_preview_png": "outputs\\dem_aoi_hidden_valley_slope_preview.png"
+        }
+      }
+    }
+  },
+  "outputs": [
+    "data\\processed\\dem_aoi_boxwork_compute_aeqd_1m.tif",
+    "data\\processed\\dem_aoi_boxwork_geographic_1m.tif",
+    "data\\processed\\dem_aoi_boxwork_slope_compute_aeqd_1m.tif",
+    "outputs\\dem_aoi_boxwork_elevation_preview.png",
+    "outputs\\dem_aoi_boxwork_slope_preview.png",
+    "data\\processed\\dem_aoi_hidden_valley_compute_aeqd_1m.tif",
+    "data\\processed\\dem_aoi_hidden_valley_geographic_1m.tif",
+    "data\\processed\\dem_aoi_hidden_valley_slope_compute_aeqd_1m.tif",
+    "outputs\\dem_aoi_hidden_valley_elevation_preview.png",
+    "outputs\\dem_aoi_hidden_valley_slope_preview.png"
+  ],
+  "assumptions": [
+    "Elevation is a continuous surface, so reprojection uses bilinear interpolation and the real NoData value (-32767) is carried through.",
+    "Slope/aspect use the Horn (1981) 3x3 method with the native 1 m pixel size."
+  ],
+  "warnings": [
+    "The GeoTIFF embeds neither band description nor vertical unit; the publisher record supplies them (recorded as evidence)."
+  ],
+  "limitations": [
+    "Terrain derivatives are computed from the DEM pixels; they are not independent measurements."
+  ],
+  "validation": {
+    "mars_crs_verified": true,
+    "crs": {
+      "crs_present": true,
+      "is_earth_crs": false,
+      "radius_ok": true,
+      "mars_crs_verified": true,
+      "notes": [],
+      "declared_name": "Mars_Equirectangular_clon0",
+      "declared_proj4": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs",
+      "radius_m": 3396190.0
+    },
+    "elevation_evidence": [
+      "Band description and vertical unit were not embedded in the GeoTIFF; they were taken from the authoritative USGS Astropedia product record (https://astrogeology.usgs.gov/search/map/mars_msl_gale_merged_dem_1m).",
+      "Publisher-declared vertical units: Meters (metres) \u2014 stated by the publisher record."
+    ]
+  },
+  "generated_at": "2026-11-14T20:23:18+01:00"
+}

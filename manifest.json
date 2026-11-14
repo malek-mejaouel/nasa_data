@@ -53,7 +53,7 @@
         "outputs\\curiosity_aoi_hidden_valley_preview.png"
       ],
       "dataset_json": "metadata\\curiosity_hirise_mosaic.json",
-      "extraction_timestamp": "2026-11-14T16:53:03+01:00",
+      "extraction_timestamp": "2026-11-14T20:19:21+01:00",
       "validation_status": {
         "mars_crs_verified": true,
         "source_verified": true
@@ -120,7 +120,7 @@
         "outputs\\aoi_hidden_valley_preview.png"
       ],
       "dataset_json": "metadata\\msl_gale_orthophoto_mosaic_25cm_v3.json",
-      "extraction_timestamp": "2026-11-14T16:53:03+01:00",
+      "extraction_timestamp": "2026-11-14T20:19:21+01:00",
       "validation_status": {
         "mars_crs_verified": true,
         "source_verified": true
@@ -139,6 +139,63 @@
         "The compute CRS is an Azimuthal Equidistant projection centred on Gale Crater (5.4 S, 137.8 E) on the Mars 2000 sphere (R = 3396190 m)."
       ],
       "attribution": "Calef III, F. J., & Parker, T. (2016). MSL Gale Merged Orthophoto Mosaic. PDS Annex, U.S. Geological Survey."
+    }
+  ],
+  "layer_stack": [
+    {
+      "order": 1,
+      "id": "layer_1_imagery",
+      "name": "Imagery",
+      "kind": "raster",
+      "data_class": "continuous",
+      "resampling": "bilinear",
+      "status": "done",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_1_imagery.json"
+    },
+    {
+      "order": 2,
+      "id": "layer_2_elevation",
+      "name": "Elevation",
+      "kind": "raster",
+      "data_class": "continuous",
+      "resampling": "bilinear",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_2_elevation.json"
+    },
+    {
+      "order": 3,
+      "id": "layer_3_geology",
+      "name": "Geology",
+      "kind": "vector",
+      "data_class": "categorical",
+      "resampling": "nearest",
+      "status": "unavailable",
+      "has_outputs": false,
+      "layer_json": "metadata/layer_3_geology.json"
+    },
+    {
+      "order": 4,
+      "id": "layer_4_rover_trajectory",
+      "name": "Rover trajectory",
+      "kind": "vector",
+      "data_class": "trajectory",
+      "resampling": "sample-nearest",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_4_rover_trajectory.json"
+    },
+    {
+      "order": 5,
+      "id": "layer_5_points_of_interest",
+      "name": "Points of interest",
+      "kind": "vector",
+      "data_class": "points",
+      "resampling": "sample-nearest",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_5_points_of_interest.json"
     }
   ]
 }

@@ -24,7 +24,8 @@ def _fmt(value, nd=6):
 
 
 def generate_readme(ctx: dict, doc: dict, local_ctx: dict | None = None,
-                    local_doc: dict | None = None) -> str:
+                    local_doc: dict | None = None,
+                    layer_export: dict | None = None) -> str:
     meta = ctx["raster_metadata"]
     src = ctx["source_metadata"]
     dims = doc["dimensions"]
@@ -228,6 +229,9 @@ def generate_readme(ctx: dict, doc: dict, local_ctx: dict | None = None,
     if local_doc:
         _append_local_dataset(L, local_ctx, local_doc)
 
+    if layer_export:
+        _append_layer_stack(L, layer_export)
+
     return "\n".join(L)
 
 
@@ -369,6 +373,87 @@ def _append_local_dataset(L: list, ctx: dict, doc: dict) -> None:
     for assumption in val.get("assumptions", []):
         a(f"- {assumption}")
     a("")
+
+
+def _append_layer_stack(L: list, layer_export: dict) -> None:
+    """Append Part C — the registry-driven Gale Crater layer stack."""
+    a = L.append
+    stack = layer_export.get("stack", {})
+    docs = layer_export.get("docs", {})
+
+    a("---\n")
+    a("# Part C — Gale Crater layer stack (Layers 1–5)\n")
+    a("The stack is declared as **data** in `src/layer_registry.py`: adding a "
+      "sixth layer is a configuration change, not a code change. Each layer "
+      "declares a `data_class` and a `resampling` mode, and the two are enforced "
+      "to be consistent — `continuous → bilinear`, `categorical → nearest`, "
+      "`trajectory`/`points → sample-nearest`.\n")
+
+    a("## C.1 Stack overview\n")
+    a("| Order | Layer | Kind | Data class | Resampling | Status | Outputs |")
+    a("|---|---|---|---|---|---|---|")
+    for layer in stack.get("layers", []):
+        a(f"| {layer['order']} | {layer['name']} (`{layer['id']}`) | "
+          f"{layer['kind']} | {layer['data_class']} | {layer['resampling']} | "
+          f"{layer['status']} | {'yes' if layer.get('has_outputs') else 'no'} |")
+    a("")
+    a(f"Compute CRS: `{stack.get('compute_crs')}`  ")
+    a(f"Storage CRS: `{stack.get('storage_crs')}`\n")
+
+    for layer in stack.get("layers", []):
+        doc = docs.get(layer["id"], {})
+        meta = doc.get("layer", {})
+        a(f"## C.{layer['order'] + 1} Layer {layer['order']} — {layer['name']}\n")
+        a(f"- **id:** `{layer['id']}`")
+        a(f"- **kind / data class / resampling:** {meta.get('kind')} / "
+          f"{meta.get('data_class')} / {meta.get('resampling')}")
+        a(f"- **status:** {meta.get('status')}")
+        if meta.get("vertical_unit"):
+            a(f"- **vertical unit:** {meta.get('vertical_unit')}")
+        a(f"- **source descriptor:** `{json.dumps(meta.get('source_descriptor'))}`")
+        a("")
+
+        if doc.get("source_metadata"):
+            a("**Source metadata (from the publisher / resolved source):**\n")
+            a("```json")
+            a(json.dumps(doc["source_metadata"], indent=2, default=str))
+            a("```")
+            a("")
+        if doc.get("calculated"):
+            a("**Calculated values (computed by this pipeline):**\n")
+            a("```json")
+            a(json.dumps(doc["calculated"], indent=2, default=str))
+            a("```")
+            a("")
+        else:
+            a("**Calculated values:** not available (no source resolved or the "
+              "layer is derived).\n")
+
+        if doc.get("outputs"):
+            a("**Output files:**")
+            for out in doc["outputs"]:
+                a(f"- `{out}`")
+            a("")
+        else:
+            a("**Output files:** none.\n")
+
+        if doc.get("assumptions"):
+            a("**Assumptions:**")
+            for item in doc["assumptions"]:
+                a(f"- {item}")
+            a("")
+        if doc.get("warnings"):
+            a("**Warnings:**")
+            for item in doc["warnings"]:
+                a(f"- {item}")
+            a("")
+        if doc.get("limitations"):
+            a("**Limitations:**")
+            for item in doc["limitations"]:
+                a(f"- {item}")
+            a("")
+        a(f"- **Validation:** `{json.dumps(doc.get('validation', {}), default=str)}`")
+        a("")
 
 
 def write_readme(path: str, text: str) -> None:

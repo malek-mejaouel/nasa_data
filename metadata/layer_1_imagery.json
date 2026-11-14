@@ -1,0 +1,121 @@
+{
+  "layer": {
+    "id": "layer_1_imagery",
+    "order": 1,
+    "name": "Imagery",
+    "kind": "raster",
+    "data_class": "continuous",
+    "resampling": "bilinear",
+    "status": "done",
+    "vertical_unit": null,
+    "source_descriptor": {
+      "kind": "remote_url",
+      "ref": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/MSL_Gale_Orthophoto_Mosaic_25cm_v3.tif",
+      "dataset_id": "msl_gale_orthophoto_mosaic_25cm_v3",
+      "note": "Produced by the existing pipeline (remote mosaic + local HiRISE)."
+    },
+    "output_basename": null
+  },
+  "coordinates": {
+    "planet": "Mars",
+    "iau_identifier": 49900,
+    "storage_crs": {
+      "name": "Mars (2015) - Sphere / Ocentric",
+      "proj4": "+proj=longlat +R=3396190 +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Geodetic latitude",
+          "unit": "degree",
+          "direction": "north"
+        },
+        {
+          "name": "Geodetic longitude",
+          "unit": "degree",
+          "direction": "east"
+        }
+      ],
+      "is_earth": false
+    },
+    "compute_crs": {
+      "name": "Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m)",
+      "proj4": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Easting",
+          "unit": "metre",
+          "direction": "east"
+        },
+        {
+          "name": "Northing",
+          "unit": "metre",
+          "direction": "north"
+        }
+      ],
+      "is_earth": false
+    },
+    "longitude_convention": "east-positive",
+    "longitude_range": [
+      -180,
+      180
+    ],
+    "latitude_type": "planetocentric"
+  },
+  "source_resolution": null,
+  "source_metadata": {
+    "authors": "Fred J. Calef III and Timothy Parker",
+    "originators": "JPL-Caltech, NASA, USGS Astrogeology Science Center, University of Arizona",
+    "publisher": "USGS Astrogeology Science Center",
+    "publication_date": "2016-10-20",
+    "edition": "version 3",
+    "recommended_citation": "Calef III, F. J., & Parker, T. (2016). MSL Gale Merged Orthophoto Mosaic. PDS Annex, U.S. Geological Survey.",
+    "map_projection_name": "Equirectangular",
+    "latitude_type": "Planetocentric",
+    "longitude_direction": "Positive East",
+    "longitude_domain": "-180 to 180",
+    "radius_a_m": 3396190,
+    "radius_c_m": 3396190,
+    "control_net": "MOLA",
+    "declared_resolution_m": 0.25,
+    "declared_width": 180000,
+    "declared_height": 280000,
+    "declared_bands": 1,
+    "declared_bit_type": 8,
+    "declared_min_lon": 137.094719,
+    "declared_max_lon": 137.853896,
+    "declared_min_lat": -5.249525,
+    "declared_max_lat": -4.068583,
+    "external_file_size": "23 GB (as listed; actual HTTP Content-Length differs)",
+    "checksum_md5": "e1b8670b605eb593dc1d0551f6c45b64",
+    "native_environment": "ESRI ArcInfo"
+  },
+  "calculated": {
+    "note": "Imagery statistics live in the dataset JSON documents.",
+    "dataset_json": [
+      "metadata/msl_gale_orthophoto_mosaic_25cm_v3.json",
+      "metadata/curiosity_hirise_mosaic.json"
+    ]
+  },
+  "outputs": [
+    "data\\processed\\aoi_boxwork_compute_aeqd_25cm.tif",
+    "data\\processed\\aoi_boxwork_geographic_25cm.tif",
+    "outputs\\aoi_boxwork_preview.png",
+    "data\\processed\\aoi_hidden_valley_compute_aeqd_25cm.tif",
+    "data\\processed\\aoi_hidden_valley_geographic_25cm.tif",
+    "outputs\\aoi_hidden_valley_preview.png",
+    "data\\processed\\curiosity_aoi_boxwork_compute_aeqd_25cm.tif",
+    "data\\processed\\curiosity_aoi_boxwork_geographic_25cm.tif",
+    "outputs\\curiosity_aoi_boxwork_preview.png",
+    "data\\processed\\curiosity_aoi_hidden_valley_compute_aeqd_25cm.tif",
+    "data\\processed\\curiosity_aoi_hidden_valley_geographic_25cm.tif",
+    "outputs\\curiosity_aoi_hidden_valley_preview.png"
+  ],
+  "assumptions": [
+    "Layer 1 is the pre-existing pipeline output (remote mosaic + local HiRISE), reused unchanged."
+  ],
+  "warnings": [
+    "Pixel values are image DN (0-255), not elevation."
+  ],
+  "limitations": [],
+  "validation": {},
+  "generated_at": "2026-11-14T20:23:18+01:00"
+}

@@ -155,3 +155,172 @@ LOCAL_SOURCE_METADATA = {
     "radius_a_m": 3396190,
     "radius_c_m": 3396190,
 }
+
+# ---------------------------------------------------------------------------
+# LAYER STACK — Layers 2..5 (see src/layer_registry.py)
+# ---------------------------------------------------------------------------
+# A *dataset* is a source artefact; a *layer* is a processed, viewer-ready
+# output in the map stack. Layer 1 (imagery) is produced by the existing
+# pipeline. Layers 2..5 are declared below as data so that adding a layer is a
+# configuration change, not a code change (see layer_registry.py).
+
+LAYER_STACK_JSON = os.path.join(METADATA_DIR, "layer_stack.json")
+
+# --- Layer 2 — Elevation (raster, continuous -> bilinear) -------------------
+# USGS Astropedia "Mars MSL Gale Merged DEM 1 m (v3)". Verified live: HTTP 200,
+# Content-Length 3,868,256,546 bytes, image/tiff, Accept-Ranges: bytes.
+# Native CRS ESRI:103885 = Mars_2000_Equidistant_Cylindrical_sphere
+# (projected equirectangular in metres, R = 3396190 m, not an Earth CRS).
+# Layout: 1-row-per-strip (block 1 x 32980), LZW, no overviews -> the existing
+# banded remote-read strategy applies. Values float32, NoData -32767.0.
+DEM_LAYER_ID = "layer_2_elevation"
+DEM_DATASET_ID = "msl_gale_merged_dem_1m_v3"
+DEM_NAME = "Mars MSL Gale Merged DEM (1 m)"
+DEM_FILENAME = "MSL_Gale_DEM_Mosaic_1m_v3.tif"
+DEM_SOURCE_URL = (
+    "https://planetarymaps.usgs.gov/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif"
+)
+DEM_VSI_PATH = "/vsicurl/" + DEM_SOURCE_URL
+DEM_OUTPUT_BASENAME = "dem"
+DEM_NODATA = -32767.0
+# Vertical units are stated by the authoritative publisher record (see README).
+# They are NOT inferred from the pixels; the enrichment carries this evidence.
+DEM_VERTICAL_UNIT = "metre"
+DEM_BAND_DESCRIPTION = "Elevation (MOLA-tied DEM)"
+DEM_SOURCE_METADATA = {
+    "publisher": "USGS Astrogeology Science Center",
+    "product": "Mars MSL Gale Merged DEM Mosaic 1 m (v3)",
+    "product_page": "https://astrogeology.usgs.gov/search/map/mars_msl_gale_merged_dem_1m",
+    "recommended_citation": (
+        "Mars MSL Gale Merged DEM Mosaic 1 m, USGS Astrogeology Science Center, "
+        "PDS Annex."
+    ),
+    "vertical_crs_units": "Meters (metres) — stated by the publisher record",
+    "map_projection_name": "Equirectangular (projected, metres)",
+    "latitude_type": "Planetocentric",
+    "longitude_direction": "Positive East",
+    "longitude_domain": "-180 to 180",
+    "radius_m": 3396190,
+    "control_net": "MOLA",
+    "declared_resolution_m": 1.0,
+    "native_crs_epsg_like": "ESRI:103885 (Mars_2000_Equidistant_Cylindrical_sphere)",
+    "content_length_bytes": 3868256546,
+    "provenance_note": (
+        "Direct GeoTIFF resolved from the supplied Astropedia product page. "
+        "Vertical units are taken from the publisher record, not measured."
+    ),
+}
+
+# --- Local MSL PLACES base DEM (supplied in ressources/) --------------------
+# The MSL PLACES RDR bundles a 1 m/px equirectangular base DEM (derived from
+# MRO HiRISE/CTX) alongside the localization table ``localized_interp.csv``; the
+# table even carries per-row ``dem_pixel_line``/``dem_pixel_sample`` indices into
+# this exact raster. It is local (~297 MB) and covers ~83% of the traverse, so it
+# is the preferred DEM for sampling the L4 trajectory elevation profile and the
+# L5 POIs (local reads, no remote transfer). Points outside its footprint are
+# backfilled from the broader remote Layer-2 Gale DEM so the profile stays
+# complete; the per-point source is recorded, never hidden. Layer 2's regional
+# analysis still uses the remote Gale DEM, because the Gale AOIs fall outside
+# this file's footprint.
+DEM_LOCAL_FILENAME = "msl_orbital_dem.img"
+DEM_LOCAL_LABEL_FILENAME = "msl_orbital_dem.lbl"
+DEM_LOCAL_PATH = os.path.join(PROJECT_ROOT, "ressources", DEM_LOCAL_FILENAME)
+DEM_LOCAL_LABEL_PATH = os.path.join(PROJECT_ROOT, "ressources", DEM_LOCAL_LABEL_FILENAME)
+DEM_LOCAL_SOURCE_METADATA = {
+    "dataset_id": "MSL-M-ROVER-6-RDR-PLACES-V1.0",
+    "product_id": "msl_orbital_dem",
+    "publisher": "NASA Planetary Data System (MSL PLACES RDR)",
+    "description": (
+        "Base DEM derived from MRO HiRISE and CTX, distributed with the MSL "
+        "PLACES localization product."
+    ),
+    "map_projection": "Equirectangular (planetocentric, east-positive)",
+    "map_scale_m_per_pixel": 1.0,
+    "radius_m": 3396190,
+    "latitude_type": "Planetocentric",
+    "longitude_direction": "Positive East",
+    "sample_type": "IEEE_REAL (32-bit)",
+    "lines": 11571,
+    "line_samples": 6741,
+    "start_time": "2012-08-06T05:18:39",
+    "stop_time": "2023-04-16T16:10:31",
+    "provenance_note": (
+        "Read from disk read-only. Georeferencing is taken from its PDS3 label: "
+        "a Mars 2000 sphere equirectangular projection (R = 3396190 m), never an "
+        "Earth CRS."
+    ),
+}
+
+# --- Layer 3 — Geology (vector, categorical -> nearest-neighbour) -----------
+# No stable, machine-readable Gale geology vector file could be resolved from
+# the supplied source. Per the project's no-fabrication rule this layer is
+# declared but reported `unavailable` (null statistics) until a real file is
+# supplied. When a file IS supplied it is ingested verbatim and, if rasterised,
+# MUST use nearest-neighbour (categorical data).
+GEOLOGY_LAYER_ID = "layer_3_geology"
+GEOLOGY_LOCAL_CANDIDATES = [
+    os.path.join(PROJECT_ROOT, "ressources", "gale_geology.geojson"),
+    os.path.join(PROJECT_ROOT, "ressources", "gale_geology.gpkg"),
+    os.path.join(PROJECT_ROOT, "ressources", "gale_geology.shp"),
+]
+GEOLOGY_SOURCE_PAGES = [
+    "https://knowledge.uchicago.edu/records/mbtjz-2wa73"
+    "  (journal article; supplementary PDFs only — no GIS file is published)",
+    "https://astrogeology.usgs.gov/search/map/gale_crater"
+    "  (Astropedia product page; no resolvable direct file)",
+]
+
+# --- Layer 4 — Rover trajectory (ordered line, temporal dimension) ----------
+# The user selected "fetch from the PDS node". The MSL PLACES localization
+# product is the intended source. The endpoint is probed at run time; if it
+# cannot be resolved the layer is reported `unavailable` rather than fabricated.
+TRAVERSE_LAYER_ID = "layer_4_rover_trajectory"
+# The authoritative product is the PDS MSL PLACES rover localization table
+# (MSL-M-ROVER-6-RDR-PLACES-V1.0). ``localized_interp.csv`` + its PDS3 label
+# ``localized_interp.lbl`` were supplied in ressources/.
+TRAVERSE_LOCAL_CANDIDATES = [
+    os.path.join(PROJECT_ROOT, "ressources", "localized_interp.csv"),
+    os.path.join(PROJECT_ROOT, "ressources", "traverse.geojson"),
+    os.path.join(PROJECT_ROOT, "ressources", "traverse.csv"),
+]
+TRAVERSE_LABEL_CANDIDATES = [
+    os.path.join(PROJECT_ROOT, "ressources", "localized_interp.lbl"),
+]
+TRAVERSE_SOURCE_CANDIDATES = [
+    "https://planetarydata.jpl.nasa.gov/img/data/msl/MSLPLC_1XXX/",
+    "https://an.rsl.wustl.edu/",
+]
+# Ordering uses the monotonic spacecraft clock (sclk) when present; the human
+# readable temporal axis (sol) is detected separately.
+TRAVERSE_ORDER_CANDIDATES = [
+    "sclk", "scet",
+    "sol", "sol_number", "rover_sol",
+    "seq", "sequence", "order", "index",
+    "utc", "date_utc", "datetime", "timestamp", "time",
+]
+TRAVERSE_TIME_CANDIDATES = [
+    "sol", "utc", "date_utc", "datetime", "timestamp", "time", "scet",
+]
+# Lon/lat must be DEGREES. Projected metre axes (easting/northing) are
+# deliberately NOT accepted here to avoid the degrees-vs-metres unit trap.
+TRAVERSE_LON_CANDIDATES = ["planetocentric_longitude", "lon", "longitude", "x"]
+TRAVERSE_LAT_CANDIDATES = ["planetocentric_latitude", "lat", "latitude", "y"]
+TRAVERSE_ELEV_CANDIDATES = ["elevation", "elevation_m", "elev", "height", "altitude", "z"]
+TRAVERSE_FRAME_CANDIDATES = ["frame"]
+TRAVERSE_SOL_CANDIDATES = ["sol"]
+
+# The PLACES product interpolates a position every few centimetres along each
+# drive, giving ~5x10^4 waypoints. The elevation profile is therefore sampled at
+# stations at least this far apart along the path, capped at
+# TRAVERSE_MAX_DEM_SAMPLES; the thinning is recorded (indices and counts), never
+# hidden. The locally supplied PLACES base DEM makes each sample a cheap local
+# read, so the cap is generous.
+TRAVERSE_DEM_SAMPLE_SPACING_M = 50.0
+TRAVERSE_MAX_DEM_SAMPLES = 1000
+
+# --- Layer 5 — Points of interest (points, sampled from L2/L3) --------------
+# Derived from the Layer 4 waypoints (user decision). Each POI samples L2
+# elevation and (if available) L3 geological unit. Derived POIs are flagged
+# `authoritative: false`.
+POI_LAYER_ID = "layer_5_points_of_interest"
+POI_DERIVE_FROM = TRAVERSE_LAYER_ID

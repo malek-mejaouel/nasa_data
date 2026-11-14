@@ -1,0 +1,122 @@
+{
+  "layer": {
+    "id": "layer_3_geology",
+    "order": 3,
+    "name": "Geology",
+    "kind": "vector",
+    "data_class": "categorical",
+    "resampling": "nearest",
+    "status": "unavailable",
+    "vertical_unit": null,
+    "source_descriptor": {
+      "kind": "local_or_remote_file",
+      "ref": null,
+      "local_candidates": [
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.geojson",
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.gpkg",
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.shp"
+      ],
+      "attempted_pages": [
+        "https://knowledge.uchicago.edu/records/mbtjz-2wa73  (journal article; supplementary PDFs only \u2014 no GIS file is published)",
+        "https://astrogeology.usgs.gov/search/map/gale_crater  (Astropedia product page; no resolvable direct file)"
+      ]
+    },
+    "output_basename": "geology"
+  },
+  "coordinates": {
+    "planet": "Mars",
+    "iau_identifier": 49900,
+    "storage_crs": {
+      "name": "Mars (2015) - Sphere / Ocentric",
+      "proj4": "+proj=longlat +R=3396190 +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Geodetic latitude",
+          "unit": "degree",
+          "direction": "north"
+        },
+        {
+          "name": "Geodetic longitude",
+          "unit": "degree",
+          "direction": "east"
+        }
+      ],
+      "is_earth": false
+    },
+    "compute_crs": {
+      "name": "Mars Gale-centred Azimuthal Equidistant (lat_0=-5.4, lon_0=137.8, R=3396190 m)",
+      "proj4": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs",
+      "axis_info": [
+        {
+          "name": "Easting",
+          "unit": "metre",
+          "direction": "east"
+        },
+        {
+          "name": "Northing",
+          "unit": "metre",
+          "direction": "north"
+        }
+      ],
+      "is_earth": false
+    },
+    "longitude_convention": "east-positive",
+    "longitude_range": [
+      -180,
+      180
+    ],
+    "latitude_type": "planetocentric"
+  },
+  "source_resolution": null,
+  "source_metadata": {
+    "source_descriptor": {
+      "kind": "local_or_remote_file",
+      "ref": null,
+      "local_candidates": [
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.geojson",
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.gpkg",
+        "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.shp"
+      ],
+      "attempted_pages": [
+        "https://knowledge.uchicago.edu/records/mbtjz-2wa73  (journal article; supplementary PDFs only \u2014 no GIS file is published)",
+        "https://astrogeology.usgs.gov/search/map/gale_crater  (Astropedia product page; no resolvable direct file)"
+      ]
+    }
+  },
+  "calculated": null,
+  "outputs": [],
+  "assumptions": [
+    "The layer is declared in the registry; the supplied reference resolved to no machine-readable GIS file, so no data was produced."
+  ],
+  "warnings": [
+    "No data was written for this layer."
+  ],
+  "limitations": [
+    "Statistics are null because no source was available; no geometry, length, area or elevation value was invented."
+  ],
+  "validation": {
+    "source_attempts": [
+      {
+        "target": "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.geojson",
+        "result": "not found on local disk"
+      },
+      {
+        "target": "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.gpkg",
+        "result": "not found on local disk"
+      },
+      {
+        "target": "C:\\Users\\user\\Documents\\trae_projects\\nasa_data\\ressources\\gale_geology.shp",
+        "result": "not found on local disk"
+      },
+      {
+        "target": "https://knowledge.uchicago.edu/records/mbtjz-2wa73  (journal article; supplementary PDFs only \u2014 no GIS file is published)",
+        "result": "listed only; no direct file resolved"
+      },
+      {
+        "target": "https://astrogeology.usgs.gov/search/map/gale_crater  (Astropedia product page; no resolvable direct file)",
+        "result": "listed only; no direct file resolved"
+      }
+    ]
+  },
+  "generated_at": "2026-11-14T20:23:18+01:00"
+}

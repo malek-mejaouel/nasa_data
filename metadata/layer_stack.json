@@ -1,0 +1,66 @@
+{
+  "layer_stack_version": 1,
+  "planet": "Mars",
+  "iau_identifier": 49900,
+  "description": "Processed, viewer-ready layers of the Gale Crater map stack. Layer 1 (imagery) is produced by the main pipeline; layers 2-5 are registry-driven and documented in their own JSON documents.",
+  "compute_crs": "+proj=aeqd +lat_0=-5.4 +lon_0=137.8 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs +type=crs",
+  "storage_crs": "+proj=longlat +R=3396190 +no_defs +type=crs",
+  "layers": [
+    {
+      "order": 1,
+      "id": "layer_1_imagery",
+      "name": "Imagery",
+      "kind": "raster",
+      "data_class": "continuous",
+      "resampling": "bilinear",
+      "status": "done",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_1_imagery.json"
+    },
+    {
+      "order": 2,
+      "id": "layer_2_elevation",
+      "name": "Elevation",
+      "kind": "raster",
+      "data_class": "continuous",
+      "resampling": "bilinear",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_2_elevation.json"
+    },
+    {
+      "order": 3,
+      "id": "layer_3_geology",
+      "name": "Geology",
+      "kind": "vector",
+      "data_class": "categorical",
+      "resampling": "nearest",
+      "status": "unavailable",
+      "has_outputs": false,
+      "layer_json": "metadata/layer_3_geology.json"
+    },
+    {
+      "order": 4,
+      "id": "layer_4_rover_trajectory",
+      "name": "Rover trajectory",
+      "kind": "vector",
+      "data_class": "trajectory",
+      "resampling": "sample-nearest",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_4_rover_trajectory.json"
+    },
+    {
+      "order": 5,
+      "id": "layer_5_points_of_interest",
+      "name": "Points of interest",
+      "kind": "vector",
+      "data_class": "points",
+      "resampling": "sample-nearest",
+      "status": "processed",
+      "has_outputs": true,
+      "layer_json": "metadata/layer_5_points_of_interest.json"
+    }
+  ],
+  "generated_at": "2026-11-14T20:23:18+01:00"
+}
